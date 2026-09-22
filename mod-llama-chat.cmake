@@ -66,3 +66,18 @@ if(TARGET modules)
         target_link_libraries(modules PRIVATE pthread)
     endif()
 endif()
+
+# ─────────────────────────────────────────────────────────────────────────
+# Lua-скрипты модуля
+#
+# Кладём их при `cmake --install` в <prefix>/lua_scripts/mod-llama-chat/ ,
+# откуда их рекурсивно подхватывает движок ALE (ALE.ScriptPath = lua_scripts).
+# Каталог назван по имени модуля - чтобы при нескольких модулях со своими
+# скриптами ничего не смешивалось.
+# ─────────────────────────────────────────────────────────────────────────
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lua")
+    install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/lua/"
+            DESTINATION "lua_scripts/mod-llama-chat"
+            FILES_MATCHING PATTERN "*.lua")
+    message(STATUS "[mod-llama-chat] Lua-скрипты будут установлены в lua_scripts/mod-llama-chat/")
+endif()
