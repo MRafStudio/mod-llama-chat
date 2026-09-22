@@ -1,5 +1,5 @@
 
-CREATE TABLE IF NOT EXISTS mod_ollama_chat_history (
+CREATE TABLE IF NOT EXISTS mod_llama_wow_history (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     bot_guid BIGINT UNSIGNED NOT NULL,
     player_guid BIGINT UNSIGNED NOT NULL,

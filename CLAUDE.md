@@ -1,4 +1,4 @@
-# CLAUDE.md — mod-ollama-chat
+# CLAUDE.md — mod-llama-wow
 
 Guidance for working in this module. The repo-level `CLAUDE.md` at the
 AzerothCore root still applies; this adds module-specific rules.
@@ -15,17 +15,17 @@ hard to attribute back here.
 
 The module previously spawned one detached `std::thread` per bot per message and
 called `ObjectAccessor`, `Channel::Say`, `botAI->Say` and the whole eligibility
-scan from it. That is what `mod-ollama-chat_dispatch.{h,cpp}` exists to prevent.
+scan from it. That is what `mod-llama-wow_dispatch.{h,cpp}` exists to prevent.
 
 How to add a new kind of bot utterance:
 
 1. Build the prompt **on the world thread**, where the `Player*` is live.
-2. Fill an `OllamaChatRequest` — resolve every value you need (names, guids,
+2. Fill an `LlamaWowChatRequest` — resolve every value you need (names, guids,
    scope key) into it now, so the worker never has to touch a `Player`.
-3. `OllamaDispatch_Submit(std::move(request))`.
-4. Delivery happens for you in `OllamaDispatch_Update()`, on the world thread.
+3. `LlamaWowDispatch_Submit(std::move(request))`.
+4. Delivery happens for you in `LlamaWowDispatch_Update()`, on the world thread.
 
-Do **not** call `QueryOllama()` directly from anywhere that could be the world
+Do **not** call `QueryLlamaWow()` directly from anywhere that could be the world
 thread — it blocks for a full LLM round trip.
 
 `EventProcessor::AddEvent` (`bot->m_Events`) is **not** a way around this. It
@@ -34,11 +34,11 @@ same race it looks like it avoids.
 
 ## The second rule: workers never read config strings directly
 
-A worker thread must not touch `g_OllamaUrl`, `g_OllamaModel`,
-`g_OllamaSystemPrompt`, `g_OllamaStop`, `g_OllamaSeed`,
+A worker thread must not touch `g_LlamaWowUrl`, `g_LlamaWowModel`,
+`g_LlamaWowSystemPrompt`, `g_LlamaWowStop`, `g_LlamaWowSeed`,
 `g_SentimentAnalysisPrompt` or any other `std::string` global.
 
-`.ollama reload` reassigns those on the world thread. Reassigning a
+`.llamawow reload` reassigns those on the world thread. Reassigning a
 `std::string` frees the old buffer, and a worker copying it at that moment
 dereferences freed memory. This produced a real crash in the wild: an
 ACCESS_VIOLATION deep inside cpp-httplib's header handling, with a stack that
@@ -46,8 +46,8 @@ pointed at the HTTP client rather than at the actual cause.
 
 The pattern to follow:
 
-- endpoint settings go through `OllamaConfig_Snapshot()`, published under a
-  mutex by `OllamaConfig_Publish()` at the end of `LoadOllamaChatConfig()`
+- endpoint settings go through `LlamaWowConfig_Snapshot()`, published under a
+  mutex by `LlamaWowConfig_Publish()` at the end of `LoadLlamaWowChatConfig()`
 - anything else a worker needs is formatted on the world thread at submit time
   and carried in the task (see `BuildSentimentPrompt`,
   `Memory_BuildCondensationPrompt`)
@@ -62,7 +62,7 @@ Zone channels are named `"General - Elwynn Forest"`, so
 (Trade, GuildRecruitment) only exist in cities. Names are localized, so any
 substring test on them breaks on a non-English realm.
 
-Use `OllamaResolveZoneChannel(bot, ChatChannelId::X)`, which matches on channel
+Use `LlamaWowResolveZoneChannel(bot, ChatChannelId::X)`, which matches on channel
 id plus zone-name containment the way `PlayerbotAI::SayToChannel` does, and
 carry the channel's *actual* name and id into the request. Getting this wrong
 silently loses ambient chatter, and also splits the governor's scope key so
@@ -104,19 +104,19 @@ repetition history.
 Whatever is most concrete and quotable in the prompt is what the model will
 talk about. Historically the module pasted every off-cooldown spell a bot knew
 into the prompt, which is exactly why bots kept talking about their spellbook.
-`OllamaChat.Snapshot.IncludeSpells` defaults to `0` for this reason.
+`mod_llama_wow.Snapshot.IncludeSpells` defaults to `0` for this reason.
 
 When adding prompt material, prefer things outside the bot — people nearby,
 what just happened, where they are — over facts about the bot itself. The
-weights in `OllamaChat.Topic.*` encode this deliberately.
+weights in `mod_llama_wow.Topic.*` encode this deliberately.
 
 ## Conventions
 
-- Log to `module.ollamachat`, not `server.loading`. It falls back to the
+- Log to `module.mod_llama_wow`, not `server.loading`. It falls back to the
   `Logger.module` entry that ships in `worldserver.conf.dist`, so it works
   untouched and is separately tunable. Keep startup/registration messages on
   `server.loading`.
-- Every new setting goes in `conf/mod_ollama_chat.conf.dist` with a comment
+- Every new setting goes in `conf/mod_llama_wow.conf.dist` with a comment
   block explaining what it does and its default. That file is the module's real
   documentation surface.
 - Source files are globbed by AzerothCore (`modules/*/src/*.cpp`); new files

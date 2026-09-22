@@ -1,13 +1,13 @@
 # Bot Personality Management Commands
 
-This document describes the new personality management system for mod-ollama-chat.
+This document describes the new personality management system for mod-llama-wow.
 
 ## Database Changes
 
-A new column `manual_only` has been added to the `mod_ollama_chat_personality_templates` table:
+A new column `manual_only` has been added to the `mod_llama_wow_personality_templates` table:
 
 ```sql
-ALTER TABLE `mod_ollama_chat_personality_templates`
+ALTER TABLE `mod_llama_wow_personality_templates`
 ADD COLUMN `manual_only` TINYINT(1) NOT NULL DEFAULT 0 AFTER `prompt`;
 ```
 
@@ -17,48 +17,48 @@ When `manual_only` is set to `1` (TRUE), that personality will NOT be randomly a
 
 All commands require Administrator permission (SEC_ADMINISTRATOR).
 
-### `.ollama personality get <botname>`
+### `.llamawow personality get <botname>`
 
 Gets the current personality assigned to a specific bot.
 
 **Example:**
 ```
-.ollama personality get Molarini
+.llamawow personality get Molarini
 ```
 
 **Output:**
 ```
-OllamaChat: Bot 'Molarini' has personality 'GAMER'
+LlamaWowChat: Bot 'Molarini' has personality 'GAMER'
   Prompt: Focus on game mechanics, min-maxing, and efficiency.
 ```
 
-### `.ollama personality set <botname> <personality>`
+### `.llamawow personality set <botname> <personality>`
 
 Sets a specific personality for a bot. This saves the personality to the database.
 
 **Example:**
 ```
-.ollama personality set Molarini ROLEPLAY
+.llamawow personality set Molarini ROLEPLAY
 ```
 
 **Output:**
 ```
-OllamaChat: Set bot 'Molarini' personality to 'ROLEPLAY'
+LlamaWowChat: Set bot 'Molarini' personality to 'ROLEPLAY'
   Prompt: Respond in-character, weaving lore into your response.
 ```
 
-### `.ollama personality list`
+### `.llamawow personality list`
 
 Lists all available personalities in the system, showing which ones are manual-only.
 
 **Example:**
 ```
-.ollama personality list
+.llamawow personality list
 ```
 
 **Output:**
 ```
-OllamaChat: Available personalities (33 total, 30 random-assignable):
+LlamaWowChat: Available personalities (33 total, 30 random-assignable):
   - GAMER
     Focus on game mechanics, min-maxing, and efficiency.
   - ROLEPLAYER
@@ -73,14 +73,14 @@ OllamaChat: Available personalities (33 total, 30 random-assignable):
 To create a manual-only personality, set the `manual_only` column to `1` in the database:
 
 ```sql
-INSERT INTO `mod_ollama_chat_personality_templates` (`key`, `prompt`, `manual_only`) VALUES
+INSERT INTO `mod_llama_wow_personality_templates` (`key`, `prompt`, `manual_only`) VALUES
 ('SPECIAL_NPC', 'Act like a specific named NPC with unique dialogue.', 1);
 ```
 
 or update an existing one:
 
 ```sql
-UPDATE `mod_ollama_chat_personality_templates` 
+UPDATE `mod_llama_wow_personality_templates` 
 SET `manual_only` = 1 
 WHERE `key` = 'EDGE_LORD';
 ```
@@ -95,7 +95,7 @@ WHERE `key` = 'EDGE_LORD';
 
 - The random personality assignment system now only uses personalities where `manual_only = 0`
 - Manually assigned personalities persist across server restarts (stored in database)
-- The `.ollama reload` command reloads personality templates from the database
+- The `.llamawow reload` command reloads personality templates from the database
 - Bots with manually assigned personalities keep them even if personalities are reloaded
 
 ## Related Diagnostic Commands
@@ -103,16 +103,16 @@ WHERE `key` = 'EDGE_LORD';
 These are not personality commands, but they are the fastest way to work out why
 a bot is not saying anything:
 
-### `.ollama status`
+### `.llamawow status`
 
 Endpoint and model, whether think mode is supported and why, dispatcher queue
 and worker state, delivery and drop counters, and the governor's breakdown of
 *why* replies were suppressed (cooldown, rate limit, repetition, chain depth, no
 audience).
 
-### `.ollama test <prompt>`
+### `.llamawow test <prompt>`
 
-One round trip to Ollama, with the raw and post-processed output written side by
-side to the `module.ollamachat` log.
+One round trip to LlamaWow, with the raw and post-processed output written side by
+side to the `module.mod_llama_wow` log.
 
 See the main README for the full description.

@@ -1,6 +1,6 @@
 # WoW RAG Sample Data
 
-This directory contains sample JSON data files for the Ollama Chat RAG (Retrieval-Augmented Generation) system. These files provide comprehensive World of Warcraft knowledge that the bot can use to enhance its responses with relevant game information.
+This directory contains sample JSON data files for the LlamaWow Chat RAG (Retrieval-Augmented Generation) system. These files provide comprehensive World of Warcraft knowledge that the bot can use to enhance its responses with relevant game information.
 
 ## File Structure
 
@@ -136,9 +136,9 @@ Edit existing JSON files to update information, add new entries, or correct inac
 
 ## Configuration
 
-The RAG system is controlled by configuration options in `mod_ollama_chat.conf.dist`:
+The RAG system is controlled by configuration options in `mod_llama_wow.conf.dist`:
 - `RAG.Enable`: Enable/disable the RAG system
-- `RAG.DataPath`: Path to the data directory (default: "modules/mod-ollama-chat/data/rag/")
+- `RAG.DataPath`: Path to the data directory (default: "modules/mod-llama-wow/data/rag/")
 - `RAG.SimilarityThreshold`: Minimum similarity score for information retrieval
 - `RAG.MaxResults`: Maximum number of relevant entries to include in prompts
 
