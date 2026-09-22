@@ -5,6 +5,12 @@
 
 # AzerothCore + Playerbots Module: mod-llama-chat
 
+> **Based on** [`mod-ollama-chat`](https://github.com/DustinHendrickson/mod-ollama-chat) by Dustin Hendrickson (AGPLv3).
+> **Развивается как отдельный проект** `mod-llama-chat` — MRafStudio.
+> Отличия: OpenAI-совместимый транспорт (llama.cpp / vLLM / LM Studio / DeepSeek / OpenRouter),
+> токен авторизации в любом режиме, русская локализация промптов (таблица `*_locale`),
+> чтение многомерных отношений (trust/affection/respect/attraction) из Lua-слоя.
+
 
 > [!CAUTION]
 > **LLM/AI Disclaimer:** Large Language Models (LLMs) such as those used by this module do not possess intelligence, reasoning, or true understanding. They generate text by predicting the most likely next word based on patterns in their training data—matching vectors, not thinking or comprehension. The quality and relevance of responses depend entirely on the model you use, its training data, and its configuration. Results may vary, and sometimes the output may be irrelevant, nonsensical, or simply not work as expected. This is a fundamental limitation of current AI and LLM technology. Use with realistic expectations.
@@ -109,7 +115,7 @@
 3. **Clone the Module:**
    ```bash
    cd /path/to/azerothcore/modules
-   git clone https://github.com/DustinHendrickson/mod-llama-chat.git
+   git clone https://github.com/MRafStudio/mod-llama-chat.git
    ```
 
 4. **Recompile AzerothCore:**
@@ -462,10 +468,30 @@ backlog of stale replies.
 
 ## License
 
-This module is released under the GNU GPL v3 license, consistent with AzerothCore's licensing.
+**AGPLv3** — GNU Affero General Public License v3 (см. файл [`LICENSE`](LICENSE)).
 
-## Contribution
+Модуль является производной работой от [`mod-ollama-chat`](https://github.com/DustinHendrickson/mod-ollama-chat)
+(автор Dustin Hendrickson, лицензия AGPLv3), поэтому распространяется под той же лицензией —
+как того требует copyleft. Файл лицензии и указание авторства сохраняются.
 
-Developed by Dustin Hendrickson
+> Примечание: в README апстрима лицензия была указана как «GNU GPL v3», однако файл `LICENSE`
+> в самом репозитории содержит текст **AGPLv3**. Для производной работы мы следуем файлу лицензии.
 
-Pull requests, bug reports, and feature suggestions are welcome. Please adhere to AzerothCore's coding standards and guidelines when submitting contributions.
+## Origin & Contribution
+
+**Original module:** [`mod-ollama-chat`](https://github.com/DustinHendrickson/mod-ollama-chat)
+— developed by **Dustin Hendrickson** (177 commits) with contributions from Brandyman126,
+kadeshar, jimm0thy, Jered, Fiery, Frederick, Ivan Novokhatski, mrdeath5493.
+Their work is the foundation of this project and is fully preserved in the git history.
+
+**This project (`mod-llama-chat`)** is maintained by **MRafStudio**. Changes on top of the original:
+
+| Что изменено | Детали |
+|---|---|
+| Имя модуля и ребрендинг | `mod-ollama-chat` -> `mod-llama-chat` (папка, файлы, cmake, конфиг, таблицы, команды, логгер) |
+| OpenAI-совместимый транспорт | `/v1/chat/completions` — llama.cpp, vLLM, LM Studio, DeepSeek, OpenRouter. **Внешний мост больше не нужен** |
+| Токен авторизации | Работает в **любом** режиме (`ApiKey` -> `Authorization: Bearer`), включая нативный Ollama |
+| Русская локализация | Таблица `mod_llama_chat_personality_templates_locale` (`_locale` по конвенции AC), выбор языка по локали получателя |
+| Многомерные отношения | Модуль читает 4 оси (`trust/affection/respect/attraction`) из таблицы, которую ведёт Lua-слой; правка весов не требует пересборки |
+
+Pull requests, bug reports and feature suggestions are welcome.
