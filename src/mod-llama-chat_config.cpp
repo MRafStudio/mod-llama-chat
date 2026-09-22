@@ -1270,10 +1270,11 @@ std::string GetRelationAxesPromptAddition(Player* bot, Player* player)
             "WHERE bot_guid = {} AND player_guid = {} LIMIT 1", botGuid, playerGuid))
     {
         // Оси дробные (DECIMAL(5,2)): 0.00 .. 100.00
-        const float         trust      = (*result)[0].Get<float>();
-        const float         affection  = (*result)[1].Get<float>();
-        const float         respect    = (*result)[2].Get<float>();
-        const float         attraction = (*result)[3].Get<float>();
+        // DECIMAL в ядре читается через Get<double> (см. Field.h: "DOUBLE, DECIMAL | Get<double>")
+        const double        trust      = (*result)[0].Get<double>();
+        const double        affection  = (*result)[1].Get<double>();
+        const double        respect    = (*result)[2].Get<double>();
+        const double        attraction = (*result)[3].Get<double>();
         const std::string   mood       = (*result)[4].Get<std::string>();
 
         if (trust || affection || respect || attraction)
