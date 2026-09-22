@@ -56,6 +56,17 @@ struct OllamaEndpointSettings
     float   minP             = -1.0f;
     float   presencePenalty  = -1000.0f;
     float   frequencyPenalty = -1000.0f;
+
+    // --- [MRafStudio fork] протокол и авторизация -------------------------
+    // "ollama" (по умолчанию) -- нативный /api/generate (+ /api/show);
+    // "openai" -- OpenAI-совместимый /v1/chat/completions (llama.cpp, vLLM,
+    //             Ollama >=0.2, DeepSeek, LM Studio, OpenRouter...).
+    std::string apiMode      = "ollama";
+    // Непустой ключ уходит заголовком "Authorization: Bearer <key>".
+    std::string openAiKey;
+    // Reasoning-модели без этого флага уходят в "размышления" целиком:
+    // content приходит пустым, ответ -- в reasoning_content.
+    bool        openAiDisableThinking = true;
 };
 
 // Republish from the g_Ollama* globals. Call on the world thread after config

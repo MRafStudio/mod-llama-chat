@@ -43,6 +43,51 @@ OllamaChat.Url = http://localhost:11434/api/generate
 #     Default:     llama3.2:1b
 OllamaChat.Model = llama3.2:1b
 
+###################################################################################################
+#  [MRafStudio fork "llama-wow"] Протокол обращения к LLM
+#
+#  OllamaChat.ApiMode
+#      Description: Какой протокол использовать для генерации.
+#          "ollama"  - нативный Ollama API: POST <OllamaChat.Url> = /api/generate
+#                      (+ проба возможностей через /api/show).
+#          "openai"  - OpenAI-совместимый: POST <OllamaChat.Url> =
+#                      /v1/chat/completions. Работает с llama.cpp (llama-server),
+#                      vLLM, LM Studio, Ollama >= 0.2, DeepSeek, OpenRouter и любым
+#                      другим OpenAI-совместимым сервером.
+#      Default:    "ollama"   (поведение оригинала, ничего не ломается)
+#
+#      ВАЖНО: в режиме "openai" внешний процесс-переводчик (мост Ollama->OpenAI)
+#      НЕ нужен: модуль сам говорит на OpenAI-протоколе.
+#
+#  OllamaChat.ApiKey
+#      Description: Токен доступа. Если задан - отправляется заголовком
+#                   "Authorization: Bearer <значение>". Нужен серверам, поднятым
+#                   с --api-key (llama.cpp), а также облачным API (DeepSeek и др.).
+#      Default:    ""  (заголовок не отправляется)
+#
+#  OllamaChat.OpenAiDisableThinking
+#      Description: Отправлять "chat_template_kwargs: {enable_thinking: false}".
+#                   Reasoning-модели (Qwen3 и подобные) без этого флага уходят
+#                   в размышления целиком: content приходит пустым, а весь текст
+#                   уезжает в reasoning_content.
+#      Default:    true
+#
+#  Пример для локального llama.cpp, поднятого с токеном:
+#      OllamaChat.ApiMode = "openai"
+#      OllamaChat.Url     = "http://127.0.0.1:8101/v1/chat/completions"
+#      OllamaChat.ApiKey  = "ваш-токен"
+#
+#  Пример для DeepSeek:
+#      OllamaChat.ApiMode = "openai"
+#      OllamaChat.Url     = "https://api.deepseek.com/v1/chat/completions"
+#      OllamaChat.ApiKey  = "sk-..."
+#      OllamaChat.Model   = "deepseek-chat"
+###################################################################################################
+OllamaChat.ApiMode = "ollama"
+OllamaChat.ApiKey = ""
+OllamaChat.OpenAiDisableThinking = true
+
+
 # OllamaChat.NumPredict
 #     Description: Maximum number of tokens to generate in Ollama responses.
 #     0 = unlimited. Only set if you want a hard cap.

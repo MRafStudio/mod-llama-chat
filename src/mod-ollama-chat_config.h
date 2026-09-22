@@ -55,6 +55,11 @@ extern std::string g_OllamaStop;
 extern std::string g_OllamaSystemPrompt;
 extern std::string g_OllamaSeed;
 
+// --- [MRafStudio fork] протокол и токен --------------------------------
+extern std::string g_OllamaApiMode;               // "ollama" | "openai"
+extern std::string g_OllamaApiKey;                // Bearer-токен (может быть пустым)
+extern bool        g_OllamaOpenAiDisableThinking;
+
 // Optional sampling controls for response diversity. All default to "unset",
 // in which case the field is not sent at all and the model's default applies.
 extern int32_t     g_OllamaTopK;              // -1 = unset

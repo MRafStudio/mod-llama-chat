@@ -1,4 +1,5 @@
 #include "mod-ollama-chat_api.h"
+#include "mod-ollama-chat_openai.h"   // [MRafStudio fork] OpenAI-совместимый транспорт
 #include "mod-ollama-chat_capability.h"
 #include "mod-ollama-chat_config.h"
 #include "mod-ollama-chat_httpclient.h"
@@ -170,6 +171,13 @@ namespace
         // model does on its own is not something backing think off can fix.
         result.thinkUsed = think.wanted;
 
+        // [MRafStudio fork] OpenAI-совместимый путь: при apiMode="openai" запрос
+        // уходит на /v1/chat/completions (llama.cpp, vLLM, Ollama>=0.2, DeepSeek,
+        // LM Studio...) вместо нативного /api/generate. Внешний мост-переводчик
+        // (отдельный процесс) больше не нужен.
+        if (OllamaOpenAi::IsEnabled(cfg))
+            return OllamaOpenAi::PerformOnce(cfg, prompt, think.level, reasoningReserve);
+
         const nlohmann::json request = BuildRequest(cfg, prompt, think, reasoningReserve);
 
         const auto started = std::chrono::steady_clock::now();
@@ -229,6 +237,11 @@ void OllamaConfig_Publish()
     next.minP             = g_OllamaMinP;
     next.presencePenalty  = g_OllamaPresencePenalty;
     next.frequencyPenalty = g_OllamaFrequencyPenalty;
+
+    // [MRafStudio fork] протокол и токен
+    next.apiMode               = g_OllamaApiMode;
+    next.openAiKey             = g_OllamaApiKey;
+    next.openAiDisableThinking = g_OllamaOpenAiDisableThinking;
 
     std::lock_guard<std::mutex> lock(g_settingsMutex);
     g_settings = std::move(next);

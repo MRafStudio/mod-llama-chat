@@ -108,7 +108,8 @@ namespace
     }
 
     OllamaHttpResult Perform(const ParsedUrl& u, int timeout,
-                             const std::string& jsonData, bool isPost)
+                             const std::string& jsonData, bool isPost,
+                             const httplib::Headers* extraHeaders = nullptr)
     {
         OllamaHttpResult result;
         const std::string key = u.host + ":" + std::to_string(u.port);
@@ -116,7 +117,15 @@ namespace
         InvalidateIfTimeoutChanged(timeout);
 
         httplib::Result response(nullptr, httplib::Error::Unknown);
-        const httplib::Headers headers = BuildHeaders(u.host);
+
+        // [MRafStudio fork] Дополнительные заголовки (например Authorization:
+        // Bearer для OpenAI-совместимых серверов). Без них поведение прежнее.
+        httplib::Headers headers = BuildHeaders(u.host);
+        if (extraHeaders)
+        {
+            for (const auto& h : *extraHeaders)
+                headers.emplace(h.first, h.second);
+        }
 
         if (u.https)
         {
@@ -282,4 +291,52 @@ std::string OllamaHttpClient::Post(const std::string& url, const std::string& js
 {
     OllamaHttpResult r = PostEx(url, jsonData);
     return r.ok() ? r.body : std::string();
+}
+
+// [MRafStudio fork] POST с Bearer-токеном (OpenAI-совместимые серверы).
+// Если токен пуст, поведение в точности совпадает с PostEx.
+OllamaHttpResult OllamaHttpClient::PostExWithToken(const std::string& url, const std::string& jsonData,
+                                                   const std::string& bearerToken, int timeoutOverride)
+{
+    if (bearerToken.empty())
+        return PostEx(url, jsonData, timeoutOverride);
+
+    OllamaHttpResult result;
+
+    try
+    {
+        ParsedUrl u = ParseUrl(url);
+        if (!u.valid)
+        {
+            result.error = "Invalid URL format: " + url;
+            LOG_ERROR("module.ollamachat", "[Ollama Chat] {}", result.error);
+            return result;
+        }
+
+        const int timeout = timeoutOverride > 0
+                                ? timeoutOverride
+                                : (g_HttpTimeoutSeconds > 0
+                                       ? static_cast<int>(g_HttpTimeoutSeconds)
+                                       : m_timeout);
+
+        if (g_DebugEnabled)
+            LOG_INFO("module.ollamachat", "[Ollama Chat] POST (bearer) {}{}", u.host, u.path);
+
+        httplib::Headers extra = { { "Authorization", "Bearer " + bearerToken } };
+        result = Perform(u, timeout, jsonData, true, &extra);
+
+        if (!result.error.empty())
+            LOG_ERROR("module.ollamachat", "[Ollama Chat] HTTP POST (bearer) to {}:{} failed: {}",
+                      u.host, u.path, result.error);
+        else if (!result.ok() && g_DebugEnabled)
+            LOG_INFO("module.ollamachat", "[Ollama Chat] HTTP {} from {} (bearer) body: {}",
+                     result.status, u.path, result.body.substr(0, 300));
+    }
+    catch (const std::exception& e)
+    {
+        result.error = e.what();
+        LOG_ERROR("module.ollamachat", "[Ollama Chat] HTTP client exception: {}", e.what());
+    }
+
+    return result;
 }

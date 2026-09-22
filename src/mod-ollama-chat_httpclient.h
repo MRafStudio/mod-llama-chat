@@ -31,6 +31,12 @@ public:
     // capability probe wants to fail fast rather than hang startup diagnostics.
     OllamaHttpResult PostEx(const std::string& url, const std::string& jsonData,
                             int timeoutOverride = 0);
+
+    // [MRafStudio fork] То же, но с необязательным Bearer-токеном.
+    // Нужно OpenAI-совместимому режиму: серверы запускают с --api-key,
+    // и без заголовка Authorization они отвечают 401.
+    OllamaHttpResult PostExWithToken(const std::string& url, const std::string& jsonData,
+                                     const std::string& bearerToken, int timeoutOverride = 0);
     OllamaHttpResult GetEx(const std::string& url, int timeoutOverride = 0);
 
     void SetTimeout(int seconds);

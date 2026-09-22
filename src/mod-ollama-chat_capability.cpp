@@ -186,6 +186,16 @@ namespace
 
 void OllamaCapability_Init(bool force)
 {
+    // [MRafStudio fork] В OpenAI-совместимом режиме нативного /api/show нет
+    // (llama.cpp/vLLM отвечают 404), поэтому пробу не запускаем вовсе:
+    // думание считается недоступным, а в лог не сыплются ложные ошибки.
+    if (g_OllamaApiMode == "openai" || g_OllamaApiMode == "openai-compatible" || g_OllamaApiMode == "v1")
+    {
+        SetSupport(OllamaThinkSupport::Unsupported,
+                   "openai-compatible mode: /api/show probe skipped");
+        return;
+    }
+
     const std::string base  = OllamaDeriveBaseUrl(g_OllamaUrl);
     const std::string model = g_OllamaModel;
 

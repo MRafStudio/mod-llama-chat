@@ -58,6 +58,12 @@ uint32_t    g_OllamaNumCtx = 0;
 uint32_t    g_OllamaNumThreads = 0;
 std::string g_OllamaStop = "";
 std::string g_OllamaSystemPrompt = "";
+
+// [MRafStudio fork] Протокол обращения к LLM и токен доступа.
+// "ollama" -- как раньше (нативный /api/generate); "openai" -- /v1/chat/completions.
+std::string g_OllamaApiMode = "ollama";
+std::string g_OllamaApiKey = "";
+bool        g_OllamaOpenAiDisableThinking = true;
 std::string g_OllamaSeed = "";
 int32_t     g_OllamaTopK             = -1;
 float       g_OllamaMinP             = -1.0f;
@@ -525,6 +531,11 @@ void LoadOllamaChatConfig()
     g_OllamaStop                      = sConfigMgr->GetOption<std::string>("OllamaChat.Stop", "");
     g_OllamaSystemPrompt              = sConfigMgr->GetOption<std::string>("OllamaChat.SystemPrompt", "");
     g_OllamaSeed                      = sConfigMgr->GetOption<std::string>("OllamaChat.Seed", "");
+
+    // [MRafStudio fork] протокол + токен
+    g_OllamaApiMode                   = sConfigMgr->GetOption<std::string>("OllamaChat.ApiMode", "ollama");
+    g_OllamaApiKey                    = sConfigMgr->GetOption<std::string>("OllamaChat.ApiKey", "");
+    g_OllamaOpenAiDisableThinking     = sConfigMgr->GetOption<bool>("OllamaChat.OpenAiDisableThinking", true);
 
     g_MaxConcurrentQueries            = sConfigMgr->GetOption<uint32_t>("OllamaChat.MaxConcurrentQueries", 0);
 
