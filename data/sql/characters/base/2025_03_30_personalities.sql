@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `mod_llama_personality`;
-CREATE TABLE IF NOT EXISTS `mod_llama_personality` (
+DROP TABLE IF EXISTS `mod_llama_chat_personality`;
+CREATE TABLE IF NOT EXISTS `mod_llama_chat_personality` (
   `guid` int NOT NULL,
   `personality` int NOT NULL DEFAULT 0,
   PRIMARY KEY (`guid`)
