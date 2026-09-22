@@ -7,7 +7,7 @@
 #include "mod-llama-chat_rag.h"
 #include "Log.h"
 
-void Addmod-llama-chatScripts()
+void Addmod_llama_chatScripts()
 {
     LOG_INFO("server.loading", "[Llama Chat] Registering mod-llama-chat scripts.");
     new LlamaChatConfigWorldScript();
