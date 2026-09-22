@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="./icon.png" alt="LlamaWow Chat Module" title="LlamaWow Chat Module Icon">
+  <img src="./icon.png" alt="Llama Chat Module" title="Llama Chat Module Icon">
 </p>
 
 
-# AzerothCore + Playerbots Module: mod-llama-wow
+# AzerothCore + Playerbots Module: mod-llama
 
 
 > [!CAUTION]
@@ -23,12 +23,12 @@
 
 ## Overview
 
-***mod-llama-wow*** is an AzerothCore module that enhances the Player Bots module by integrating external language model (LLM) support via the LlamaWow API. This module enables player bots to generate dynamic, in-character chat responses using advanced natural language processing locally on your computer (or remotely hosted). Bots are enriched with personality traits, random chatter triggers, and context-aware replies that mimic the language and lore of World of Warcraft.
+***mod-llama*** is an AzerothCore module that enhances the Player Bots module by integrating external language model (LLM) support via the Llama API. This module enables player bots to generate dynamic, in-character chat responses using advanced natural language processing locally on your computer (or remotely hosted). Bots are enriched with personality traits, random chatter triggers, and context-aware replies that mimic the language and lore of World of Warcraft.
 
 ## Features
 
-- **LlamaWow LLM Integration:**  
-  Bots generate chat responses by querying an external LlamaWow API endpoint. This enables natural and contextually appropriate in-game dialogue.
+- **Llama LLM Integration:**  
+  Bots generate chat responses by querying an external Llama API endpoint. This enables natural and contextually appropriate in-game dialogue.
 
 - **Player Bot Personalities:**  
   When enabled, each bot is assigned a personality type (e.g., Gamer, Roleplayer, Trickster) that modifies its chat style. Personalities influence prompt generation and result in varied, immersive responses.
@@ -60,10 +60,10 @@
   When enabled, bots will only respond to real player messages and events when they are in the same non-raid party. This helps reduce chat spam while maintaining full bot-to-bot communication within parties for immersive group interactions.
 
 - **Think Mode Support:**  
-  Bots can leverage LLM models that have reasoning/think modes. Enable internal reasoning for models that support it by setting `mod_llama_wow.ThinkModeEnableForModule = 1` in **mod_llama_wow.conf**. When enabled, the API request includes the `think` flag and the bot omits all `thinking` responses from its final reply.
+  Bots can leverage LLM models that have reasoning/think modes. Enable internal reasoning for models that support it by setting `mod_llama.ThinkModeEnableForModule = 1` in **mod_llama.conf**. When enabled, the API request includes the `think` flag and the bot omits all `thinking` responses from its final reply.
 
 - **Live Reload for Personalities and Settings:**  
-  Instantly reload all mod-llama-wow configuration and personality packs in-game using the `.llamawow reload` command with a GM level account or use `ollama reload` from the server console. No server restart required—updates to `.conf` or personality packs (`.sql` files) are applied immediately.
+  Instantly reload all mod-llama configuration and personality packs in-game using the `.llama reload` command with a GM level account or use `ollama reload` from the server console. No server restart required—updates to `.conf` or personality packs (`.sql` files) are applied immediately.
 
 ## Installation
 
@@ -109,7 +109,7 @@
 3. **Clone the Module:**
    ```bash
    cd /path/to/azerothcore/modules
-   git clone https://github.com/DustinHendrickson/mod-llama-wow.git
+   git clone https://github.com/DustinHendrickson/mod-llama.git
    ```
 
 4. **Recompile AzerothCore:**
@@ -123,7 +123,7 @@
 5. **Configuration:**
    Copy the default configuration file to your server configuration directory and change to match your setup (if not already done):
    ```bash
-   cp /path/to/azerothcore/modules/mod-llama-wow/conf/mod_llama_wow.conf.dist /path/to/azerothcore/env/dist/etc/modules/mod_llama_wow.conf
+   cp /path/to/azerothcore/modules/mod-llama/conf/mod_llama.conf.dist /path/to/azerothcore/env/dist/etc/modules/mod_llama.conf
    ```
 
 6. **Restart the Server:**
@@ -131,20 +131,20 @@
    ./worldserver
    ```
 
-## Setting up LlamaWow Server
+## Setting up Llama Server
 
-This module requires a running LlamaWow server to function. LlamaWow allows you to run large language models locally on your machine.
+This module requires a running Llama server to function. Llama allows you to run large language models locally on your machine.
 
-### Installing LlamaWow
+### Installing Llama
 
 Download and install Ollama from [ollama.com](https://ollama.com) — либо используйте llama.cpp, vLLM, LM Studio и любой другой сервер. It supports Windows, macOS, and Linux.
 
 - **Windows/macOS:** Download the installer from the website and run it.
 - **Linux:** Follow the installation instructions for your distribution (e.g., `curl -fsSL https://ollama.com/install.sh | sh`).
 
-### Starting the LlamaWow Server
+### Starting the Llama Server
 
-Once installed, start the LlamaWow server:
+Once installed, start the Llama server:
 
 ```bash
 ollama serve
@@ -152,19 +152,19 @@ ollama serve
 
 This will start the server on `http://localhost:11434` by default.
 
-### Running LlamaWow Across the Network
+### Running Llama Across the Network
 
-If you want to run the LlamaWow server on a different computer than your AzerothCore server, set the `OLLAMA_HOST` environment variable to `0.0.0.0` before starting the server:
+If you want to run the Llama server on a different computer than your AzerothCore server, set the `OLLAMA_HOST` environment variable to `0.0.0.0` before starting the server:
 
 ```bash
 export OLLAMA_HOST=0.0.0.0
 ollama serve
 ```
 
-This binds the server to all network interfaces, allowing connections from other machines on your network. Update the `mod_llama_wow.ApiEndpoint` in `mod_llama_wow.conf` to use the IP address of the machine running LlamaWow (e.g., `http://192.168.1.100:11434`).
+This binds the server to all network interfaces, allowing connections from other machines on your network. Update the `mod_llama.ApiEndpoint` in `mod_llama.conf` to use the IP address of the machine running Llama (e.g., `http://192.168.1.100:11434`).
 
 > [!WARNING]
-> Exposing LlamaWow to the network may pose security risks. Ensure your firewall allows traffic on port 11434 only from trusted networks, and consider additional security measures if exposing to the internet.
+> Exposing Llama to the network may pose security risks. Ensure your firewall allows traffic on port 11434 only from trusted networks, and consider additional security measures if exposing to the internet.
 
 ### Pulling a Model
 
@@ -178,11 +178,11 @@ You can find available models at [ollama.com/library](https://ollama.com/library
 
 ### Connecting the Module
 
-The module connects to the LlamaWow API via the configuration in `mod_llama_wow.conf`. The default endpoint is `http://localhost:11434`. If your LlamaWow server is running on a different host or port, update the `mod_llama_wow.ApiEndpoint` setting.
+The module connects to the Llama API via the configuration in `mod_llama.conf`. The default endpoint is `http://localhost:11434`. If your Llama server is running on a different host or port, update the `mod_llama.ApiEndpoint` setting.
 
-### Checking if LlamaWow is Running
+### Checking if Llama is Running
 
-To verify that the LlamaWow server is running and accessible, you can test the API:
+To verify that the Llama server is running and accessible, you can test the API:
 
 ```bash
 curl http://localhost:11434/api/tags
@@ -192,64 +192,64 @@ This should return a JSON response listing available models. If you get a connec
 
 ## Configuration Options
 
-> For a complete list of all available configuration options with comments and defaults, see `mod_llama_wow.conf.dist` included in this repository.
+> For a complete list of all available configuration options with comments and defaults, see `mod_llama.conf.dist` included in this repository.
 
 ## Text Commands
 
-The module provides several in-game text commands for administrators (Game Masters) to manage and monitor the LlamaWow chat functionality. All commands require **SEC_ADMINISTRATOR** security level (GM level 3 or higher).
+The module provides several in-game text commands for administrators (Game Masters) to manage and monitor the Llama chat functionality. All commands require **SEC_ADMINISTRATOR** security level (GM level 3 or higher).
 
-### `.llamawow reload`
-Reloads the module's configuration from `mod_llama_wow.conf` without restarting the server. Also reloads personality packs and sentiment data.
+### `.llama reload`
+Reloads the module's configuration from `mod_llama.conf` without restarting the server. Also reloads personality packs and sentiment data.
 - **Security Level:** SEC_ADMINISTRATOR
-- **Usage:** `.llamawow reload`
-- **Console Equivalent:** `llamawow reload`
+- **Usage:** `.llama reload`
+- **Console Equivalent:** `llama reload`
 
-### `.llamawow sentiment view [bot_name] [player_name]`
+### `.llama sentiment view [bot_name] [player_name]`
 Displays sentiment tracking data between bots and players.
 - **Security Level:** SEC_ADMINISTRATOR
 - **Usage:**
-  - `.llamawow sentiment view` - Shows all sentiment data
-  - `.llamawow sentiment view BotName` - Shows sentiment data for a specific bot
-  - `.llamawow sentiment view BotName PlayerName` - Shows sentiment between specific bot and player
-- **Console Equivalent:** `llamawow sentiment view [bot] [player]`
+  - `.llama sentiment view` - Shows all sentiment data
+  - `.llama sentiment view BotName` - Shows sentiment data for a specific bot
+  - `.llama sentiment view BotName PlayerName` - Shows sentiment between specific bot and player
+- **Console Equivalent:** `llama sentiment view [bot] [player]`
 
-### `.llamawow sentiment set <bot_name> <player_name> <value>`
+### `.llama sentiment set <bot_name> <player_name> <value>`
 Manually sets the sentiment value between a bot and player (0.0 to 1.0).
 - **Security Level:** SEC_ADMINISTRATOR
-- **Usage:** `.llamawow sentiment set BotName PlayerName 0.8`
-- **Console Equivalent:** `llamawow sentiment set <bot> <player> <value>`
+- **Usage:** `.llama sentiment set BotName PlayerName 0.8`
+- **Console Equivalent:** `llama sentiment set <bot> <player> <value>`
 
-### `.llamawow sentiment reset [bot_name] [player_name]`
+### `.llama sentiment reset [bot_name] [player_name]`
 Resets sentiment data to default values.
 - **Security Level:** SEC_ADMINISTRATOR
 - **Usage:**
-  - `.llamawow sentiment reset` - Resets all sentiment data
-  - `.llamawow sentiment reset BotName` - Resets all sentiment data for a specific bot
-  - `.llamawow sentiment reset BotName PlayerName` - Resets sentiment between specific bot and player
-- **Console Equivalent:** `llamawow sentiment reset [bot] [player]`
+  - `.llama sentiment reset` - Resets all sentiment data
+  - `.llama sentiment reset BotName` - Resets all sentiment data for a specific bot
+  - `.llama sentiment reset BotName PlayerName` - Resets sentiment between specific bot and player
+- **Console Equivalent:** `llama sentiment reset [bot] [player]`
 
-### `.llamawow personality get <bot_name>`
+### `.llama personality get <bot_name>`
 Displays the current personality assigned to a bot.
 - **Security Level:** SEC_ADMINISTRATOR
-- **Usage:** `.llamawow personality get BotName`
-- **Console Equivalent:** `llamawow personality get <bot>`
+- **Usage:** `.llama personality get BotName`
+- **Console Equivalent:** `llama personality get <bot>`
 
-### `.llamawow personality set <bot_name> <personality>`
+### `.llama personality set <bot_name> <personality>`
 Manually assigns a personality to a bot.
 - **Security Level:** SEC_ADMINISTRATOR
-- **Usage:** `.llamawow personality set BotName Gamer`
-- **Console Equivalent:** `llamawow personality set <bot> <personality>`
+- **Usage:** `.llama personality set BotName Gamer`
+- **Console Equivalent:** `llama personality set <bot> <personality>`
 
-### `.llamawow personality list`
+### `.llama personality list`
 Lists all available personalities and their descriptions.
 - **Security Level:** SEC_ADMINISTRATOR
-- **Usage:** `.llamawow personality list`
-- **Console Equivalent:** `llamawow personality list`
+- **Usage:** `.llama personality list`
+- **Console Equivalent:** `llama personality list`
 
 > [!NOTE]
 > All commands can also be executed from the server console by replacing the leading dot (.) with the command prefix used in your console (typically none or a custom prefix).
 
-### `.llamawow status`
+### `.llama status`
 
 Shows what the module currently thinks it is doing. Reports the endpoint and
 model, whether think mode is supported and why, dispatcher queue depth and
@@ -258,10 +258,10 @@ replies were suppressed), and the last error.
 
 This is the first thing to run when bots go quiet.
 
-### `.llamawow test <prompt>`
+### `.llama test <prompt>`
 
-Sends one prompt straight to LlamaWow and writes the raw output and the
-post-processed output side by side to the server log (`module.mod_llama_wow`),
+Sends one prompt straight to Llama and writes the raw output and the
+post-processed output side by side to the server log (`module.mod_llama`),
 along with the round-trip time and whether think mode was used. Turns "the bots
 aren't talking" into a one-command diagnosis.
 
@@ -277,7 +277,7 @@ aren't talking" into a one-command diagnosis.
    For each reply, a prompt is assembled by combining configurable templates with live in-game context: bot/player class, race, gender, role/spec, faction, guild, level, zone, gold, group, environment info, personality, and if enabled, recent chat history between that player and the bot.
 
 4. **LLM Request**  
-   The prompt is sent to the LlamaWow API using the configured model and parameters. All LLM requests run asynchronously, ensuring no lag or blocking of the server.
+   The prompt is sent to the Llama API using the configured model and parameters. All LLM requests run asynchronously, ensuring no lag or blocking of the server.
 
 5. **Response Routing**  
    Bot responses are routed back through the appropriate chat channel in game, whether it’s say, yell, party or general.
@@ -289,24 +289,24 @@ aren't talking" into a one-command diagnosis.
    In addition to responding to direct chat, bots will occasionally generate random environment-aware lines when real players are nearby, and will also react to key in-game events (e.g., PvP/PvE kills, loot, deaths, quests, duels, level-ups, achievements, using objects) using context-specific templates and personalities.
 
 8. **Live Reloading**  
-   You can hot-reload the module config and personality packs in-game using the `.llamawow reload` GM command or from the server console. All changes take effect immediately without requiring a restart.
+   You can hot-reload the module config and personality packs in-game using the `.llama reload` GM command or from the server console. All changes take effect immediately without requiring a restart.
 
 9. **Fully Configurable**  
-   All settings—reply logic, distances, frequencies, blacklist, prompt templates, chat history, personalities, random/event chatter, LLM params, and more—are controlled via `mod_llama_wow.conf` and can be adjusted and reloaded live at any time.
+   All settings—reply logic, distances, frequencies, blacklist, prompt templates, chat history, personalities, random/event chatter, LLM params, and more—are controlled via `mod_llama.conf` and can be adjusted and reloaded live at any time.
 
 ## Personality Packs
 
-`mod-llama-wow` supports Personality Packs, which are collections of personality templates that define how bots roleplay and interact in-game.
+`mod-llama` supports Personality Packs, which are collections of personality templates that define how bots roleplay and interact in-game.
 
 - To use a Personality Pack, download or create a `.sql` file named in the format `YYYY_MM_DD_personality_pack_NAME.sql`.
 
-- Place the `.sql` file in `modules/mod-llama-wow/data/sql/characters/updates/`.
+- Place the `.sql` file in `modules/mod-llama/data/sql/characters/updates/`.
 
 - The module will automatically detect and apply any new Personality Packs when the server starts or updates—no manual SQL import required.
 
 Want to create your own pack or download packs made by the community?  
 
-Visit the [Personality Packs Discussion Board](https://github.com/DustinHendrickson/mod-llama-wow/discussions)
+Visit the [Personality Packs Discussion Board](https://github.com/DustinHendrickson/mod-llama/discussions)
 
 ## Debugging
 
@@ -328,7 +328,7 @@ config file.
 | **Repetition scoring** | The same line twice, and the same *opening phrase* twice. Candidate replies are scored against the bot's own recent lines and the channel's recent traffic. |
 
 If bots are looping, the setting to reach for first is
-`mod_llama_wow.BotConversation.RequireRecentHuman`.
+`mod_llama.BotConversation.RequireRecentHuman`.
 
 ## What Bots Talk About
 
@@ -346,7 +346,7 @@ suppresses whatever it used in its last few picks.
 near them — kills, deaths, level-ups, loot. This is what lets a bot comment on
 the fight you were both just in rather than reciting a fact about itself.
 
-Note that `mod_llama_wow.Snapshot.IncludeSpells` now defaults to **0**. Listing
+Note that `mod_llama.Snapshot.IncludeSpells` now defaults to **0**. Listing
 every off-cooldown spell a bot knew put dozens of lines of the most quotable
 text in the prompt, which is why bots talked about their spellbook so much.
 
@@ -391,14 +391,14 @@ Tune it under the `LONG-TERM MEMORY AND RELATIONSHIPS` section of the config.
 
 ## Roleplay Mode
 
-Off by default. Turn on with `mod_llama_wow.Roleplay.Enable`.
+Off by default. Turn on with `mod_llama.Roleplay.Enable`.
 
 Gives each race a speech register and cultural touchstones, and each class a
 worldview — what that character *notices*. A Tauren speaks slowly of the
 Earthmother and the balance; a Forsaken is dry and calls the living "breathers";
 a priest sees wounds, a hunter reads tracks, a rogue counts exits.
 
-`mod_llama_wow.Roleplay.Strictness` controls how far it goes:
+`mod_llama.Roleplay.Strictness` controls how far it goes:
 
 - **0** — Flavour only. Voices colour the prompt, nothing else changes.
 - **1** — In character. Out-of-world vocabulary (`dps`, `nerf`, `patch`, …) is
@@ -407,13 +407,13 @@ a priest sees wounds, a hunter reads tracks, a rogue counts exits.
   out-of-character ones, injuries and distances are described rather than
   quoted as figures, and think mode is used where the model supports it.
 
-`mod_llama_wow.Roleplay.CrossFactionGibberish` (on by default in roleplay mode)
+`mod_llama.Roleplay.CrossFactionGibberish` (on by default in roleplay mode)
 stops bots answering across factions in say/yell — the client renders those as
 gibberish anyway, so a fluent reply is the most immersion-breaking thing the
 module can do.
 
 Race and class voices can be overridden per server in the
-`mod_llama_wow_voice` table without a rebuild.
+`mod_llama_voice` table without a rebuild.
 
 ## Body Language
 
@@ -435,9 +435,9 @@ a log line.
 
 ## Think Mode
 
-`mod_llama_wow.ThinkMode` takes `auto` (default), `on`, or `off`.
+`mod_llama.ThinkMode` takes `auto` (default), `on`, or `off`.
 
-Under `auto` the module asks LlamaWow what the configured model can actually do
+Under `auto` the module asks Llama what the configured model can actually do
 and only ever sends `think` to a model that reports the capability — so a model
 that cannot think is never asked to. It then spends reasoning only where it
 changes the answer: off for short chat lines, on for sentiment analysis and
@@ -445,9 +445,9 @@ strict roleplay replies.
 
 If a live request is ever rejected for asking to think, the module remembers
 that, logs it once, and retries without it. A latency guard
-(`mod_llama_wow.ThinkMaxLatencyMs`) backs think mode off for the session if it
+(`mod_llama.ThinkMaxLatencyMs`) backs think mode off for the session if it
 proves too slow for chat. You do not need to restart after swapping models —
-`.llamawow reload` re-probes.
+`.llama reload` re-probes.
 
 ## Threading Model
 
@@ -455,9 +455,9 @@ Worker threads do HTTP and string work only. Every read or write of a `Player`,
 `Channel`, `Guild`, `Group` or `Map` happens on the world thread.
 
 Requests are built on the world thread, handed to a bounded worker pool
-(`mod_llama_wow.WorkerThreads`), and delivered back on the world thread by a
+(`mod_llama.WorkerThreads`), and delivered back on the world thread by a
 completion queue drained each tick. Queue depth is capped
-(`mod_llama_wow.MaxQueueDepth`) so a slow LlamaWow sheds load instead of building a
+(`mod_llama.MaxQueueDepth`) so a slow Llama sheds load instead of building a
 backlog of stale replies.
 
 ## License

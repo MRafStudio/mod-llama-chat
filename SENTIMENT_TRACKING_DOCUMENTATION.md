@@ -1,6 +1,6 @@
 # Bot-Player Sentiment Tracking System
 
-This document describes the new sentiment tracking system implemented in mod-llama-wow, which allows bots to develop persistent relationships with players based on their interactions.
+This document describes the new sentiment tracking system implemented in mod-llama, which allows bots to develop persistent relationships with players based on their interactions.
 
 ## Overview
 
@@ -35,7 +35,7 @@ any, since a blocking HTTP call on the world thread would stall the server.
 Sentiment requests are also capped at half the dispatcher queue depth, so they
 can never crowd out actual chat.
 
-Under `mod_llama_wow.ThinkMode = auto`, sentiment is the one request kind that
+Under `mod_llama.ThinkMode = auto`, sentiment is the one request kind that
 *does* use think mode when the model supports it: it is a judgement call rather
 than a one-liner, and the result is never shown to players.
 
@@ -46,10 +46,10 @@ than a one-liner, and the result is never shown to players.
 
 ## Database Schema
 
-The system creates a new table: `mod_llama_wow_bot_player_sentiments`
+The system creates a new table: `mod_llama_bot_player_sentiments`
 
 ```sql
-CREATE TABLE IF NOT EXISTS mod_llama_wow_bot_player_sentiments (
+CREATE TABLE IF NOT EXISTS mod_llama_bot_player_sentiments (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     bot_guid BIGINT UNSIGNED NOT NULL,
     player_guid BIGINT UNSIGNED NOT NULL,
@@ -62,26 +62,26 @@ CREATE TABLE IF NOT EXISTS mod_llama_wow_bot_player_sentiments (
 
 ## Configuration
 
-Add these settings to your `mod_llama_wow.conf` file:
+Add these settings to your `mod_llama.conf` file:
 
 ```ini
 # Enable sentiment tracking (default: 1)
-mod_llama_wow.EnableSentimentTracking = 1
+mod_llama.EnableSentimentTracking = 1
 
 # Default sentiment for new relationships (default: 0.5)
-mod_llama_wow.SentimentDefaultValue = 0.5
+mod_llama.SentimentDefaultValue = 0.5
 
 # How much to adjust sentiment per message (default: 0.1)
-mod_llama_wow.SentimentAdjustmentStrength = 0.1
+mod_llama.SentimentAdjustmentStrength = 0.1
 
 # How often to save sentiment data in minutes (default: 10)
-mod_llama_wow.SentimentSaveInterval = 10
+mod_llama.SentimentSaveInterval = 10
 
 # Prompt for sentiment analysis
-mod_llama_wow.SentimentAnalysisPrompt = "Analyze the sentiment of this message: \"{message}\". Respond only with: POSITIVE, NEGATIVE, or NEUTRAL."
+mod_llama.SentimentAnalysisPrompt = "Analyze the sentiment of this message: \"{message}\". Respond only with: POSITIVE, NEGATIVE, or NEUTRAL."
 
 # Template for including sentiment in bot prompts
-mod_llama_wow.SentimentPromptTemplate = "Your relationship sentiment with {player_name} is {sentiment_value} (0.0=hostile, 0.5=neutral, 1.0=friendly). Use this to guide your tone and response."
+mod_llama.SentimentPromptTemplate = "Your relationship sentiment with {player_name} is {sentiment_value} (0.0=hostile, 0.5=neutral, 1.0=friendly). Use this to guide your tone and response."
 ```
 
 ### Important: Update Your Prompt Templates
@@ -90,10 +90,10 @@ Make sure your chat and event prompt templates include the `{sentiment_info}` pl
 
 ```ini
 # Example chat template with sentiment
-mod_llama_wow.ChatPromptTemplate = "You are {bot_name}, a {bot_class} bot. {bot_personality} {sentiment_info} Player {player_name} says: {player_message}"
+mod_llama.ChatPromptTemplate = "You are {bot_name}, a {bot_class} bot. {bot_personality} {sentiment_info} Player {player_name} says: {player_message}"
 
 # Example event template with sentiment  
-mod_llama_wow.EventChatterPromptTemplate = "You are {bot_name}, a {bot_class} bot. {bot_personality} {sentiment_info} React to this event: {event_type} involving {actor_name}"
+mod_llama.EventChatterPromptTemplate = "You are {bot_name}, a {bot_class} bot. {bot_personality} {sentiment_info} React to this event: {event_type} involving {actor_name}"
 ```
 
 ## Admin Commands
@@ -102,7 +102,7 @@ The system provides several admin commands for managing sentiment data:
 
 ### View Sentiment Data
 ```
-.llamawow sentiment view [botname] [playername]
+.llama sentiment view [botname] [playername]
 ```
 - No arguments: Shows all sentiment data
 - Bot name only: Shows all sentiments for that bot
@@ -111,14 +111,14 @@ The system provides several admin commands for managing sentiment data:
 
 ### Set Sentiment Value
 ```
-.llamawow sentiment set <botname> <playername> <value>
+.llama sentiment set <botname> <playername> <value>
 ```
 - Manually sets sentiment between a bot and player
 - Value must be between 0.0 and 1.0
 
 ### Reset Sentiment Data
 ```
-.llamawow sentiment reset [botname] [playername]
+.llama sentiment reset [botname] [playername]
 ```
 - No arguments: Resets ALL sentiment data
 - Bot name only: Resets all sentiments for that bot
@@ -184,14 +184,14 @@ The system provides several admin commands for managing sentiment data:
 ## Troubleshooting
 
 ### Sentiment Not Updating
-1. Check that `mod_llama_wow.EnableSentimentTracking = 1`
+1. Check that `mod_llama.EnableSentimentTracking = 1`
 2. Verify your LLM is responding correctly to sentiment analysis prompts
 3. Check server logs for sentiment analysis debug messages
 4. Ensure your chat templates include `{sentiment_info}` placeholder
 
 ### Performance Issues
-1. Increase `mod_llama_wow.SentimentSaveInterval` to reduce database writes
-2. Consider reducing `mod_llama_wow.SentimentAdjustmentStrength` for fewer LLM calls
+1. Increase `mod_llama.SentimentSaveInterval` to reduce database writes
+2. Consider reducing `mod_llama.SentimentAdjustmentStrength` for fewer LLM calls
 3. Monitor your LLM server load
 
 ### Database Issues
@@ -202,14 +202,14 @@ The system provides several admin commands for managing sentiment data:
 ## Technical Implementation Details
 
 ### Files Added/Modified
-- `mod-llama-wow_sentiment.h` - Sentiment system header
-- `mod-llama-wow_sentiment.cpp` - Sentiment system implementation  
-- `mod-llama-wow_config.h` - Added sentiment configuration variables
-- `mod-llama-wow_config.cpp` - Added sentiment config loading
-- `mod-llama-wow_handler.cpp` - Integrated sentiment into chat processing
-- `mod-llama-wow_events.cpp` - Integrated sentiment into event system
-- `mod-llama-wow_command.h/.cpp` - Added sentiment admin commands
-- `mod-llama-wow_random.cpp` - Added sentiment periodic saving
+- `mod-llama_sentiment.h` - Sentiment system header
+- `mod-llama_sentiment.cpp` - Sentiment system implementation  
+- `mod-llama_config.h` - Added sentiment configuration variables
+- `mod-llama_config.cpp` - Added sentiment config loading
+- `mod-llama_handler.cpp` - Integrated sentiment into chat processing
+- `mod-llama_events.cpp` - Integrated sentiment into event system
+- `mod-llama_command.h/.cpp` - Added sentiment admin commands
+- `mod-llama_random.cpp` - Added sentiment periodic saving
 - `2025_07_25_sentiment_tracking.sql` - Database schema
 
 ### Thread Safety

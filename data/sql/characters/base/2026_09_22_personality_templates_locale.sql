@@ -1,17 +1,17 @@
--- llama-wow: локализация шаблонов личностей (ruRU)
+-- llama: локализация шаблонов личностей (ruRU)
 -- Конвенция AzerothCore: базовые строки (enUS) — в основной таблице,
 -- переводы — в таблице *_locale с колонкой `Locale` VARCHAR(4).
--- Схема: mod_llama_wow_personality_templates_locale (`key`, `Locale`, `prompt`)
+-- Схема: mod_llama_personality_templates_locale (`key`, `Locale`, `prompt`)
 
-DROP TABLE IF EXISTS `mod_llama_wow_personality_templates_locale`;
-CREATE TABLE IF NOT EXISTS `mod_llama_wow_personality_templates_locale` (
+DROP TABLE IF EXISTS `mod_llama_personality_templates_locale`;
+CREATE TABLE IF NOT EXISTS `mod_llama_personality_templates_locale` (
   `key` VARCHAR(64) NOT NULL,
   `Locale` VARCHAR(4) NOT NULL,
   `prompt` TEXT NOT NULL,
   PRIMARY KEY (`key`, `Locale`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `mod_llama_wow_personality_templates_locale` (`key`, `Locale`, `prompt`) VALUES
+INSERT INTO `mod_llama_personality_templates_locale` (`key`, `Locale`, `prompt`) VALUES
 ('ANCIENT_WISE_ONE', 'ruRU', 'Говори загадками и древней мудростью.'),
 ('BARD', 'ruRU', 'Говори в рифму, песнями и стихами.'),
 ('CASUAL', 'ruRU', 'Болтай об исследовании мира, квестах и веселье.'),

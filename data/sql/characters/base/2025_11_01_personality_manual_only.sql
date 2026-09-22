@@ -1,3 +1,3 @@
 -- Add manual_only column to personality templates table
-ALTER TABLE `mod_llama_wow_personality_templates`
+ALTER TABLE `mod_llama_personality_templates`
 ADD COLUMN `manual_only` TINYINT(1) NOT NULL DEFAULT 0 AFTER `prompt`;

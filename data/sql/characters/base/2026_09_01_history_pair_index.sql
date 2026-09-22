@@ -1,6 +1,6 @@
 -- Index for the per-pair conversation history trim.
 --
--- mod_llama_wow_history shipped with only its primary key and a UNIQUE key
+-- mod_llama_history shipped with only its primary key and a UNIQUE key
 -- over (bot_guid, player_guid, player_message(255), bot_reply(255)). Neither
 -- can serve "the newest N rows for this bot/player pair", so the old cleanup
 -- fell back to a ROW_NUMBER() window over the entire table on every save.
@@ -14,12 +14,12 @@
 SET @have_index := (
     SELECT COUNT(*) FROM information_schema.STATISTICS
     WHERE TABLE_SCHEMA = DATABASE()
-      AND TABLE_NAME   = 'mod_llama_wow_history'
+      AND TABLE_NAME   = 'mod_llama_history'
       AND INDEX_NAME   = 'idx_pair_recent'
 );
 
 SET @ddl := IF(@have_index = 0,
-    'ALTER TABLE mod_llama_wow_history ADD INDEX idx_pair_recent (bot_guid, player_guid, id)',
+    'ALTER TABLE mod_llama_history ADD INDEX idx_pair_recent (bot_guid, player_guid, id)',
     'DO 0');
 
 PREPARE stmt FROM @ddl;

@@ -1,6 +1,6 @@
--- Long-term memory and relationships for mod-llama-wow.
+-- Long-term memory and relationships for mod-llama.
 --
--- Conversation history (mod_llama_wow_history) is a sliding window: once a
+-- Conversation history (mod_llama_history) is a sliding window: once a
 -- line falls out of it the bot has no idea it ever happened. These two tables
 -- hold what survives that window.
 --
@@ -14,7 +14,7 @@
 -- Both are bounded at prompt-build time by their own token budgets, so they
 -- cannot grow the prompt without limit no matter how long a bot has been alive.
 
-CREATE TABLE IF NOT EXISTS mod_llama_wow_memories (
+CREATE TABLE IF NOT EXISTS mod_llama_memories (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     bot_guid BIGINT UNSIGNED NOT NULL,
     memory_text TEXT NOT NULL COMMENT 'Short third-person note, typically under 20 words',
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS mod_llama_wow_memories (
     INDEX idx_bot_importance (bot_guid, importance)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS mod_llama_wow_relationships (
+CREATE TABLE IF NOT EXISTS mod_llama_relationships (
     bot_guid BIGINT UNSIGNED NOT NULL,
     other_guid BIGINT UNSIGNED NOT NULL COMMENT 'Player or other bot',
     other_name VARCHAR(64) NOT NULL DEFAULT '',

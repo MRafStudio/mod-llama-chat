@@ -1,4 +1,4 @@
--- Roleplay voice packs for mod-llama-wow.
+-- Roleplay voice packs for mod-llama.
 --
 -- Race and class "voices" are what turn {bot_race} / {bot_class} from a stat
 -- line into a way of speaking. The module ships sensible defaults in code;
@@ -17,7 +17,7 @@
 -- The prompt text is appended to the bot's prompt verbatim, so write it as an
 -- instruction addressed to the character ("You speak slowly and...").
 
-CREATE TABLE IF NOT EXISTS mod_llama_wow_voice (
+CREATE TABLE IF NOT EXISTS mod_llama_voice (
     kind ENUM('race','class') NOT NULL COMMENT 'Which axis this voice applies to',
     id TINYINT UNSIGNED NOT NULL COMMENT 'Races or Classes enum value',
     prompt TEXT NOT NULL COMMENT 'Prompt fragment appended for this race/class',
