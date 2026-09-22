@@ -1269,20 +1269,21 @@ std::string GetRelationAxesPromptAddition(Player* bot, Player* player)
             "SELECT trust, affection, respect, attraction, mood FROM `mod_llama_chat_bot_player_sentiments` "
             "WHERE bot_guid = {} AND player_guid = {} LIMIT 1", botGuid, playerGuid))
     {
-        const int           trust     = (*result)[0].Get<uint8>();
-        const int           affection = (*result)[1].Get<uint8>();
-        const int           respect   = (*result)[2].Get<uint8>();
-        const int           attraction = (*result)[3].Get<uint8>();
-        const std::string   mood      = (*result)[4].Get<std::string>();
+        // Оси дробные (DECIMAL(5,2)): 0.00 .. 100.00
+        const float         trust      = (*result)[0].Get<float>();
+        const float         affection  = (*result)[1].Get<float>();
+        const float         respect    = (*result)[2].Get<float>();
+        const float         attraction = (*result)[3].Get<float>();
+        const std::string   mood       = (*result)[4].Get<std::string>();
 
         if (trust || affection || respect || attraction)
         {
             out = SafeFormat(g_RelationAxesPromptTemplate,
                              fmt::arg("player",     player->GetName()),
-                             fmt::arg("trust",      trust),
-                             fmt::arg("affection",  affection),
-                             fmt::arg("respect",    respect),
-                             fmt::arg("attraction", attraction),
+                             fmt::arg("trust",      fmt::format("{:.1f}", trust)),
+                             fmt::arg("affection",  fmt::format("{:.1f}", affection)),
+                             fmt::arg("respect",    fmt::format("{:.1f}", respect)),
+                             fmt::arg("attraction", fmt::format("{:.1f}", attraction)),
                              fmt::arg("mood",       mood));
         }
     }

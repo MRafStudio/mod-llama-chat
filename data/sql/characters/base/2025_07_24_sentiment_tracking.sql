@@ -5,10 +5,12 @@ CREATE TABLE IF NOT EXISTS mod_llama_chat_bot_player_sentiments (
     sentiment_value FLOAT NOT NULL DEFAULT 0.5 COMMENT 'Sentiment value: 0.0=hostile, 0.5=neutral, 1.0=friendly',
     -- [mod-llama-chat] Четыре оси отношений. Их считает Lua-слой (движок ALE) по весам
     -- из lua-конфига и пишет сюда; правка весов не требует пересборки сервера.
-    trust TINYINT UNSIGNED NOT NULL DEFAULT 50 COMMENT 'Доверие: 0..100',
-    affection TINYINT UNSIGNED NOT NULL DEFAULT 50 COMMENT 'Привязанность: 0..100',
-    respect TINYINT UNSIGNED NOT NULL DEFAULT 50 COMMENT 'Уважение: 0..100',
-    attraction TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Влечение: 0..100',
+    -- Дробные оси (десятые доли): целых слишком грубо - за три разговора
+    -- нельзя становиться другом. Тип DECIMAL(5,2): 0.00 .. 100.00
+    trust DECIMAL(5,2) NOT NULL DEFAULT 50.00 COMMENT 'Доверие: 0.00..100.00',
+    affection DECIMAL(5,2) NOT NULL DEFAULT 50.00 COMMENT 'Привязанность: 0.00..100.00',
+    respect DECIMAL(5,2) NOT NULL DEFAULT 50.00 COMMENT 'Уважение: 0.00..100.00',
+    attraction DECIMAL(5,2) NOT NULL DEFAULT 0.00 COMMENT 'Влечение: 0.00..100.00',
     mood VARCHAR(32) NOT NULL DEFAULT 'neutral' COMMENT 'Текущее настроение бота',
     last_reason VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'Последняя причина изменения',
     last_updated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

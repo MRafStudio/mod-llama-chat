@@ -213,6 +213,50 @@ W.resurrection  = { trust = 8, affection = 6, respect = 5, attraction = 1, mood 
 
 ---
 
+### Relationship scale (fractional)
+
+Axes are measured in **tenths**: `0.00 … 100.00` (type `DECIMAL(5,2)`). Integers are too coarse —
+with a rough scale three warm phrases were enough to become a "best buddy". Friendship is earned now.
+
+| Range | What the bot thinks of you |
+|---|---|
+| 0–20 | hostile |
+| 21–40 | distrustful |
+| 41–60 | neutral |
+| 61–80 | **friend** (trust ≥ 60 and affection ≥ 60) |
+| 81–100 | close |
+
+Thresholds live in `ПОРОГИ` inside the weights file. Respect does **not** participate in the friendship
+check — you can respect an enemy.
+
+### Weights (file `lua/00_relations_weights.lua`)
+
+| Event | Gain (example) |
+|---|---|
+| Ordinary chat | +0.02 … +0.03 |
+| Warm phrase ("thanks", "well done") | +0.10 … +0.20 |
+| Rudeness | −0.60 … −0.80 (**three times heavier than warmth**) |
+| Gift | +0.80 … +1.50 |
+| Help in combat | +1.50 (trust and respect) |
+| Resurrection | +2.50 |
+| Hug / kiss | +0.30 … +0.40 |
+| **Sparring with a friend** | **+0.05 … +0.10** |
+
+Scale is tuned so that going from neutral 50 to the friendship threshold takes ~200 warm phrases,
+**or** ~60 gifts, **or** ~30 fights helped. Ruining a relationship is three times faster than fixing it.
+
+### Duels: sparring is not aggression
+
+A fight between friends is **training**. Duels are handled separately from attacks:
+
+| Situation | Reaction |
+|---|---|
+| Duel with a **friend** | "let's warm up!" + tiny skill gain (`спарринг_друг`) |
+| Duel with anyone else | even smaller (`спарринг`) |
+| Bot lost to a friend | a little respect to the opponent, no grudge |
+| Bot beat the player | just a line — beating your master does **not** raise his trust |
+| **Attacking outside a duel** | **betrayal**: −5.00 trust, −3.00 affection |
+
 ## Localization
 
 Base personality strings (enUS) are in `mod_llama_chat_personality_templates`, translations are in
