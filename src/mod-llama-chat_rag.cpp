@@ -1,5 +1,5 @@
-#include "mod-llama_rag.h"
-#include "mod-llama_config.h"
+#include "mod-llama-chat_rag.h"
+#include "mod-llama-chat_config.h"
 #include "Log.h"
 #include <filesystem>
 #include <fstream>

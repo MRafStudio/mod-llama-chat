@@ -1,8 +1,8 @@
-#include "mod-llama_personality.h"
+#include "mod-llama-chat_personality.h"
 #include "Player.h"
 #include "PlayerbotMgr.h"
 #include "Log.h"
-#include "mod-llama_config.h"
+#include "mod-llama-chat_config.h"
 #include "DatabaseEnv.h"
 #include <random>
 #include <vector>
@@ -24,7 +24,7 @@ std::string GetBotPersonality(Player* bot)
         }
         if(g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Using existing personality '{}' for bot {}", it->second, bot->GetName());
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Using existing personality '{}' for bot {}", it->second, bot->GetName());
         }
         return it->second;
     }
@@ -51,7 +51,7 @@ std::string GetBotPersonality(Player* bot)
 
         if(g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Using database personality '{}' for bot {}", dbPersonality, bot->GetName());
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Using database personality '{}' for bot {}", dbPersonality, bot->GetName());
         }
         return dbPersonality;
     }
@@ -63,19 +63,19 @@ std::string GetBotPersonality(Player* bot)
 
     // Save to database if schema supports string (recommend TEXT or VARCHAR column for personality)
     QueryResult tableExists = CharacterDatabase.Query(
-        "SELECT * FROM information_schema.tables WHERE table_schema = 'acore_characters' AND table_name = 'mod_llama_personality' LIMIT 1;");
+        "SELECT * FROM information_schema.tables WHERE table_schema = 'acore_characters' AND table_name = 'mod_llama_chat_personality' LIMIT 1;");
     if (!tableExists)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Please source the required database table first");
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Please source the required database table first");
     }
     else
     {
-        CharacterDatabase.Execute("INSERT INTO mod_llama_personality (guid, personality) VALUES ({}, '{}')", botGuid, chosenPersonality);
+        CharacterDatabase.Execute("INSERT INTO mod_llama_chat_personality (guid, personality) VALUES ({}, '{}')", botGuid, chosenPersonality);
     }
 
     if(g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Assigned new personality '{}' to bot {}", chosenPersonality, bot->GetName());
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Assigned new personality '{}' to bot {}", chosenPersonality, bot->GetName());
     }
     return chosenPersonality;
 }
@@ -115,12 +115,12 @@ bool SetBotPersonality(Player* bot, const std::string& personality)
     g_BotPersonalityList[botGuid] = personality;
     
     // Update in database
-    CharacterDatabase.Execute("REPLACE INTO mod_llama_personality (guid, personality) VALUES ({}, '{}')", 
+    CharacterDatabase.Execute("REPLACE INTO mod_llama_chat_personality (guid, personality) VALUES ({}, '{}')", 
                              botGuid, personality);
     
     if(g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Set personality '{}' for bot {}", personality, bot->GetName());
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Set personality '{}' for bot {}", personality, bot->GetName());
     }
     
     return true;
@@ -143,6 +143,6 @@ void ClearAllBotPersonalities()
     g_BotPersonalityList.clear();
     if(g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Cleared all bot personality assignments due to RP personalities being disabled");
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Cleared all bot personality assignments due to RP personalities being disabled");
     }
 }

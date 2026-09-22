@@ -1,6 +1,6 @@
 # Bot-Player Sentiment Tracking System
 
-This document describes the new sentiment tracking system implemented in mod-llama, which allows bots to develop persistent relationships with players based on their interactions.
+This document describes the new sentiment tracking system implemented in mod-llama-chat, which allows bots to develop persistent relationships with players based on their interactions.
 
 ## Overview
 
@@ -35,7 +35,7 @@ any, since a blocking HTTP call on the world thread would stall the server.
 Sentiment requests are also capped at half the dispatcher queue depth, so they
 can never crowd out actual chat.
 
-Under `mod_llama.ThinkMode = auto`, sentiment is the one request kind that
+Under `mod_llama_chat.ThinkMode = auto`, sentiment is the one request kind that
 *does* use think mode when the model supports it: it is a judgement call rather
 than a one-liner, and the result is never shown to players.
 
@@ -46,10 +46,10 @@ than a one-liner, and the result is never shown to players.
 
 ## Database Schema
 
-The system creates a new table: `mod_llama_bot_player_sentiments`
+The system creates a new table: `mod_llama_chat_bot_player_sentiments`
 
 ```sql
-CREATE TABLE IF NOT EXISTS mod_llama_bot_player_sentiments (
+CREATE TABLE IF NOT EXISTS mod_llama_chat_bot_player_sentiments (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     bot_guid BIGINT UNSIGNED NOT NULL,
     player_guid BIGINT UNSIGNED NOT NULL,
@@ -62,26 +62,26 @@ CREATE TABLE IF NOT EXISTS mod_llama_bot_player_sentiments (
 
 ## Configuration
 
-Add these settings to your `mod_llama.conf` file:
+Add these settings to your `mod_llama_chat.conf` file:
 
 ```ini
 # Enable sentiment tracking (default: 1)
-mod_llama.EnableSentimentTracking = 1
+mod_llama_chat.EnableSentimentTracking = 1
 
 # Default sentiment for new relationships (default: 0.5)
-mod_llama.SentimentDefaultValue = 0.5
+mod_llama_chat.SentimentDefaultValue = 0.5
 
 # How much to adjust sentiment per message (default: 0.1)
-mod_llama.SentimentAdjustmentStrength = 0.1
+mod_llama_chat.SentimentAdjustmentStrength = 0.1
 
 # How often to save sentiment data in minutes (default: 10)
-mod_llama.SentimentSaveInterval = 10
+mod_llama_chat.SentimentSaveInterval = 10
 
 # Prompt for sentiment analysis
-mod_llama.SentimentAnalysisPrompt = "Analyze the sentiment of this message: \"{message}\". Respond only with: POSITIVE, NEGATIVE, or NEUTRAL."
+mod_llama_chat.SentimentAnalysisPrompt = "Analyze the sentiment of this message: \"{message}\". Respond only with: POSITIVE, NEGATIVE, or NEUTRAL."
 
 # Template for including sentiment in bot prompts
-mod_llama.SentimentPromptTemplate = "Your relationship sentiment with {player_name} is {sentiment_value} (0.0=hostile, 0.5=neutral, 1.0=friendly). Use this to guide your tone and response."
+mod_llama_chat.SentimentPromptTemplate = "Your relationship sentiment with {player_name} is {sentiment_value} (0.0=hostile, 0.5=neutral, 1.0=friendly). Use this to guide your tone and response."
 ```
 
 ### Important: Update Your Prompt Templates
@@ -90,10 +90,10 @@ Make sure your chat and event prompt templates include the `{sentiment_info}` pl
 
 ```ini
 # Example chat template with sentiment
-mod_llama.ChatPromptTemplate = "You are {bot_name}, a {bot_class} bot. {bot_personality} {sentiment_info} Player {player_name} says: {player_message}"
+mod_llama_chat.ChatPromptTemplate = "You are {bot_name}, a {bot_class} bot. {bot_personality} {sentiment_info} Player {player_name} says: {player_message}"
 
 # Example event template with sentiment  
-mod_llama.EventChatterPromptTemplate = "You are {bot_name}, a {bot_class} bot. {bot_personality} {sentiment_info} React to this event: {event_type} involving {actor_name}"
+mod_llama_chat.EventChatterPromptTemplate = "You are {bot_name}, a {bot_class} bot. {bot_personality} {sentiment_info} React to this event: {event_type} involving {actor_name}"
 ```
 
 ## Admin Commands
@@ -184,14 +184,14 @@ The system provides several admin commands for managing sentiment data:
 ## Troubleshooting
 
 ### Sentiment Not Updating
-1. Check that `mod_llama.EnableSentimentTracking = 1`
+1. Check that `mod_llama_chat.EnableSentimentTracking = 1`
 2. Verify your LLM is responding correctly to sentiment analysis prompts
 3. Check server logs for sentiment analysis debug messages
 4. Ensure your chat templates include `{sentiment_info}` placeholder
 
 ### Performance Issues
-1. Increase `mod_llama.SentimentSaveInterval` to reduce database writes
-2. Consider reducing `mod_llama.SentimentAdjustmentStrength` for fewer LLM calls
+1. Increase `mod_llama_chat.SentimentSaveInterval` to reduce database writes
+2. Consider reducing `mod_llama_chat.SentimentAdjustmentStrength` for fewer LLM calls
 3. Monitor your LLM server load
 
 ### Database Issues
@@ -202,14 +202,14 @@ The system provides several admin commands for managing sentiment data:
 ## Technical Implementation Details
 
 ### Files Added/Modified
-- `mod-llama_sentiment.h` - Sentiment system header
-- `mod-llama_sentiment.cpp` - Sentiment system implementation  
-- `mod-llama_config.h` - Added sentiment configuration variables
-- `mod-llama_config.cpp` - Added sentiment config loading
-- `mod-llama_handler.cpp` - Integrated sentiment into chat processing
-- `mod-llama_events.cpp` - Integrated sentiment into event system
-- `mod-llama_command.h/.cpp` - Added sentiment admin commands
-- `mod-llama_random.cpp` - Added sentiment periodic saving
+- `mod-llama-chat_sentiment.h` - Sentiment system header
+- `mod-llama-chat_sentiment.cpp` - Sentiment system implementation  
+- `mod-llama-chat_config.h` - Added sentiment configuration variables
+- `mod-llama-chat_config.cpp` - Added sentiment config loading
+- `mod-llama-chat_handler.cpp` - Integrated sentiment into chat processing
+- `mod-llama-chat_events.cpp` - Integrated sentiment into event system
+- `mod-llama-chat_command.h/.cpp` - Added sentiment admin commands
+- `mod-llama-chat_random.cpp` - Added sentiment periodic saving
 - `2025_07_25_sentiment_tracking.sql` - Database schema
 
 ### Thread Safety

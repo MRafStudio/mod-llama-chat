@@ -1,8 +1,8 @@
-#include "mod-llama_openai.h"
+#include "mod-llama-chat_openai.h"
 
-#include "mod-llama-utilities.h"
-#include "mod-llama_config.h"
-#include "mod-llama_httpclient.h"
+#include "mod-llama-chat-utilities.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_httpclient.h"
 
 #include "Log.h"
 #include "nlohmann/json.hpp"
@@ -280,7 +280,7 @@ namespace LlamaOpenAi
         }
 
         if (g_DebugEnabled)
-            LOG_INFO("module.mod_llama", "[Llama Chat] OpenAI-compatible reply ok in {}ms (finish_reason={})",
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] OpenAI-compatible reply ok in {}ms (finish_reason={})",
                      result.latencyMs, finishReason);
 
         result.ok = true;

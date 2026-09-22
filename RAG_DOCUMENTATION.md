@@ -2,7 +2,7 @@
 
 ## Overview
 
-The RAG feature enhances the mod-llama module by providing bots with relevant contextual information from a knowledge base when responding to player messages. This allows bots to give more accurate, detailed, and informative responses about World of Warcraft game mechanics, professions, classes, and other topics.
+The RAG feature enhances the mod-llama-chat module by providing bots with relevant contextual information from a knowledge base when responding to player messages. This allows bots to give more accurate, detailed, and informative responses about World of Warcraft game mechanics, professions, classes, and other topics.
 
 ## How It Works
 
@@ -18,19 +18,19 @@ The RAG feature enhances the mod-llama module by providing bots with relevant co
 
 ```properties
 # Enable/disable the RAG feature
-mod_llama.EnableRAG = 1
+mod_llama_chat.EnableRAG = 1
 
 # Path to RAG data files (relative to module data directory)
-mod_llama.RAGDataPath = rag/
+mod_llama_chat.RAGDataPath = rag/
 
 # Maximum number of information items to retrieve
-mod_llama.RAGMaxRetrievedItems = 3
+mod_llama_chat.RAGMaxRetrievedItems = 3
 
 # Minimum similarity score for information to be considered relevant (0.0-1.0)
-mod_llama.RAGSimilarityThreshold = 0.3
+mod_llama_chat.RAGSimilarityThreshold = 0.3
 
 # Template for including RAG information in prompts
-mod_llama.RAGPromptTemplate = "RELEVANT INFORMATION:\n{rag_info}\nUse this information to provide accurate and detailed responses when applicable."
+mod_llama_chat.RAGPromptTemplate = "RELEVANT INFORMATION:\n{rag_info}\nUse this information to provide accurate and detailed responses when applicable."
 ```
 
 ## Data Format
@@ -93,21 +93,21 @@ RAG data is stored in JSON files in the `data/rag/` directory. Each file contain
 
 ### RAG Not Working
 
-1. Check that `mod_llama.EnableRAG = 1`
+1. Check that `mod_llama_chat.EnableRAG = 1`
 2. Verify JSON files exist in `data/rag/` directory
 3. Check server logs for RAG initialization messages
 4. Ensure JSON syntax is valid
 
 ### Poor Relevance
 
-1. Adjust `mod_llama.RAGSimilarityThreshold` (lower = more results, higher = fewer but more relevant)
+1. Adjust `mod_llama_chat.RAGSimilarityThreshold` (lower = more results, higher = fewer but more relevant)
 2. Add more keywords to your JSON entries
 3. Review query preprocessing logic
 
 ### Performance Issues
 
-1. Reduce `mod_llama.RAGMaxRetrievedItems`
-2. Increase `mod_llama.RAGSimilarityThreshold`
+1. Reduce `mod_llama_chat.RAGMaxRetrievedItems`
+2. Increase `mod_llama_chat.RAGSimilarityThreshold`
 3. Optimize JSON file sizes
 
 ## Examples

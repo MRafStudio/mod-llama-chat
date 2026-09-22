@@ -3,7 +3,7 @@
 </p>
 
 
-# AzerothCore + Playerbots Module: mod-llama
+# AzerothCore + Playerbots Module: mod-llama-chat
 
 
 > [!CAUTION]
@@ -23,7 +23,7 @@
 
 ## Overview
 
-***mod-llama*** is an AzerothCore module that enhances the Player Bots module by integrating external language model (LLM) support via the Llama API. This module enables player bots to generate dynamic, in-character chat responses using advanced natural language processing locally on your computer (or remotely hosted). Bots are enriched with personality traits, random chatter triggers, and context-aware replies that mimic the language and lore of World of Warcraft.
+***mod-llama-chat*** is an AzerothCore module that enhances the Player Bots module by integrating external language model (LLM) support via the Llama API. This module enables player bots to generate dynamic, in-character chat responses using advanced natural language processing locally on your computer (or remotely hosted). Bots are enriched with personality traits, random chatter triggers, and context-aware replies that mimic the language and lore of World of Warcraft.
 
 ## Features
 
@@ -60,10 +60,10 @@
   When enabled, bots will only respond to real player messages and events when they are in the same non-raid party. This helps reduce chat spam while maintaining full bot-to-bot communication within parties for immersive group interactions.
 
 - **Think Mode Support:**  
-  Bots can leverage LLM models that have reasoning/think modes. Enable internal reasoning for models that support it by setting `mod_llama.ThinkModeEnableForModule = 1` in **mod_llama.conf**. When enabled, the API request includes the `think` flag and the bot omits all `thinking` responses from its final reply.
+  Bots can leverage LLM models that have reasoning/think modes. Enable internal reasoning for models that support it by setting `mod_llama_chat.ThinkModeEnableForModule = 1` in **mod_llama_chat.conf**. When enabled, the API request includes the `think` flag and the bot omits all `thinking` responses from its final reply.
 
 - **Live Reload for Personalities and Settings:**  
-  Instantly reload all mod-llama configuration and personality packs in-game using the `.llama reload` command with a GM level account or use `ollama reload` from the server console. No server restart required—updates to `.conf` or personality packs (`.sql` files) are applied immediately.
+  Instantly reload all mod-llama-chat configuration and personality packs in-game using the `.llama reload` command with a GM level account or use `ollama reload` from the server console. No server restart required—updates to `.conf` or personality packs (`.sql` files) are applied immediately.
 
 ## Installation
 
@@ -109,7 +109,7 @@
 3. **Clone the Module:**
    ```bash
    cd /path/to/azerothcore/modules
-   git clone https://github.com/DustinHendrickson/mod-llama.git
+   git clone https://github.com/DustinHendrickson/mod-llama-chat.git
    ```
 
 4. **Recompile AzerothCore:**
@@ -123,7 +123,7 @@
 5. **Configuration:**
    Copy the default configuration file to your server configuration directory and change to match your setup (if not already done):
    ```bash
-   cp /path/to/azerothcore/modules/mod-llama/conf/mod_llama.conf.dist /path/to/azerothcore/env/dist/etc/modules/mod_llama.conf
+   cp /path/to/azerothcore/modules/mod-llama-chat/conf/mod_llama_chat.conf.dist /path/to/azerothcore/env/dist/etc/modules/mod_llama_chat.conf
    ```
 
 6. **Restart the Server:**
@@ -161,7 +161,7 @@ export OLLAMA_HOST=0.0.0.0
 ollama serve
 ```
 
-This binds the server to all network interfaces, allowing connections from other machines on your network. Update the `mod_llama.ApiEndpoint` in `mod_llama.conf` to use the IP address of the machine running Llama (e.g., `http://192.168.1.100:11434`).
+This binds the server to all network interfaces, allowing connections from other machines on your network. Update the `mod_llama_chat.ApiEndpoint` in `mod_llama_chat.conf` to use the IP address of the machine running Llama (e.g., `http://192.168.1.100:11434`).
 
 > [!WARNING]
 > Exposing Llama to the network may pose security risks. Ensure your firewall allows traffic on port 11434 only from trusted networks, and consider additional security measures if exposing to the internet.
@@ -178,7 +178,7 @@ You can find available models at [ollama.com/library](https://ollama.com/library
 
 ### Connecting the Module
 
-The module connects to the Llama API via the configuration in `mod_llama.conf`. The default endpoint is `http://localhost:11434`. If your Llama server is running on a different host or port, update the `mod_llama.ApiEndpoint` setting.
+The module connects to the Llama API via the configuration in `mod_llama_chat.conf`. The default endpoint is `http://localhost:11434`. If your Llama server is running on a different host or port, update the `mod_llama_chat.ApiEndpoint` setting.
 
 ### Checking if Llama is Running
 
@@ -192,14 +192,14 @@ This should return a JSON response listing available models. If you get a connec
 
 ## Configuration Options
 
-> For a complete list of all available configuration options with comments and defaults, see `mod_llama.conf.dist` included in this repository.
+> For a complete list of all available configuration options with comments and defaults, see `mod_llama_chat.conf.dist` included in this repository.
 
 ## Text Commands
 
 The module provides several in-game text commands for administrators (Game Masters) to manage and monitor the Llama chat functionality. All commands require **SEC_ADMINISTRATOR** security level (GM level 3 or higher).
 
 ### `.llama reload`
-Reloads the module's configuration from `mod_llama.conf` without restarting the server. Also reloads personality packs and sentiment data.
+Reloads the module's configuration from `mod_llama_chat.conf` without restarting the server. Also reloads personality packs and sentiment data.
 - **Security Level:** SEC_ADMINISTRATOR
 - **Usage:** `.llama reload`
 - **Console Equivalent:** `llama reload`
@@ -261,7 +261,7 @@ This is the first thing to run when bots go quiet.
 ### `.llama test <prompt>`
 
 Sends one prompt straight to Llama and writes the raw output and the
-post-processed output side by side to the server log (`module.mod_llama`),
+post-processed output side by side to the server log (`module.mod_llama_chat`),
 along with the round-trip time and whether think mode was used. Turns "the bots
 aren't talking" into a one-command diagnosis.
 
@@ -292,21 +292,21 @@ aren't talking" into a one-command diagnosis.
    You can hot-reload the module config and personality packs in-game using the `.llama reload` GM command or from the server console. All changes take effect immediately without requiring a restart.
 
 9. **Fully Configurable**  
-   All settings—reply logic, distances, frequencies, blacklist, prompt templates, chat history, personalities, random/event chatter, LLM params, and more—are controlled via `mod_llama.conf` and can be adjusted and reloaded live at any time.
+   All settings—reply logic, distances, frequencies, blacklist, prompt templates, chat history, personalities, random/event chatter, LLM params, and more—are controlled via `mod_llama_chat.conf` and can be adjusted and reloaded live at any time.
 
 ## Personality Packs
 
-`mod-llama` supports Personality Packs, which are collections of personality templates that define how bots roleplay and interact in-game.
+`mod-llama-chat` supports Personality Packs, which are collections of personality templates that define how bots roleplay and interact in-game.
 
 - To use a Personality Pack, download or create a `.sql` file named in the format `YYYY_MM_DD_personality_pack_NAME.sql`.
 
-- Place the `.sql` file in `modules/mod-llama/data/sql/characters/updates/`.
+- Place the `.sql` file in `modules/mod-llama-chat/data/sql/characters/updates/`.
 
 - The module will automatically detect and apply any new Personality Packs when the server starts or updates—no manual SQL import required.
 
 Want to create your own pack or download packs made by the community?  
 
-Visit the [Personality Packs Discussion Board](https://github.com/DustinHendrickson/mod-llama/discussions)
+Visit the [Personality Packs Discussion Board](https://github.com/DustinHendrickson/mod-llama-chat/discussions)
 
 ## Debugging
 
@@ -328,7 +328,7 @@ config file.
 | **Repetition scoring** | The same line twice, and the same *opening phrase* twice. Candidate replies are scored against the bot's own recent lines and the channel's recent traffic. |
 
 If bots are looping, the setting to reach for first is
-`mod_llama.BotConversation.RequireRecentHuman`.
+`mod_llama_chat.BotConversation.RequireRecentHuman`.
 
 ## What Bots Talk About
 
@@ -346,7 +346,7 @@ suppresses whatever it used in its last few picks.
 near them — kills, deaths, level-ups, loot. This is what lets a bot comment on
 the fight you were both just in rather than reciting a fact about itself.
 
-Note that `mod_llama.Snapshot.IncludeSpells` now defaults to **0**. Listing
+Note that `mod_llama_chat.Snapshot.IncludeSpells` now defaults to **0**. Listing
 every off-cooldown spell a bot knew put dozens of lines of the most quotable
 text in the prompt, which is why bots talked about their spellbook so much.
 
@@ -391,14 +391,14 @@ Tune it under the `LONG-TERM MEMORY AND RELATIONSHIPS` section of the config.
 
 ## Roleplay Mode
 
-Off by default. Turn on with `mod_llama.Roleplay.Enable`.
+Off by default. Turn on with `mod_llama_chat.Roleplay.Enable`.
 
 Gives each race a speech register and cultural touchstones, and each class a
 worldview — what that character *notices*. A Tauren speaks slowly of the
 Earthmother and the balance; a Forsaken is dry and calls the living "breathers";
 a priest sees wounds, a hunter reads tracks, a rogue counts exits.
 
-`mod_llama.Roleplay.Strictness` controls how far it goes:
+`mod_llama_chat.Roleplay.Strictness` controls how far it goes:
 
 - **0** — Flavour only. Voices colour the prompt, nothing else changes.
 - **1** — In character. Out-of-world vocabulary (`dps`, `nerf`, `patch`, …) is
@@ -407,13 +407,13 @@ a priest sees wounds, a hunter reads tracks, a rogue counts exits.
   out-of-character ones, injuries and distances are described rather than
   quoted as figures, and think mode is used where the model supports it.
 
-`mod_llama.Roleplay.CrossFactionGibberish` (on by default in roleplay mode)
+`mod_llama_chat.Roleplay.CrossFactionGibberish` (on by default in roleplay mode)
 stops bots answering across factions in say/yell — the client renders those as
 gibberish anyway, so a fluent reply is the most immersion-breaking thing the
 module can do.
 
 Race and class voices can be overridden per server in the
-`mod_llama_voice` table without a rebuild.
+`mod_llama_chat_voice` table without a rebuild.
 
 ## Body Language
 
@@ -435,7 +435,7 @@ a log line.
 
 ## Think Mode
 
-`mod_llama.ThinkMode` takes `auto` (default), `on`, or `off`.
+`mod_llama_chat.ThinkMode` takes `auto` (default), `on`, or `off`.
 
 Under `auto` the module asks Llama what the configured model can actually do
 and only ever sends `think` to a model that reports the capability — so a model
@@ -445,7 +445,7 @@ strict roleplay replies.
 
 If a live request is ever rejected for asking to think, the module remembers
 that, logs it once, and retries without it. A latency guard
-(`mod_llama.ThinkMaxLatencyMs`) backs think mode off for the session if it
+(`mod_llama_chat.ThinkMaxLatencyMs`) backs think mode off for the session if it
 proves too slow for chat. You do not need to restart after swapping models —
 `.llama reload` re-probes.
 
@@ -455,9 +455,9 @@ Worker threads do HTTP and string work only. Every read or write of a `Player`,
 `Channel`, `Guild`, `Group` or `Map` happens on the world thread.
 
 Requests are built on the world thread, handed to a bounded worker pool
-(`mod_llama.WorkerThreads`), and delivered back on the world thread by a
+(`mod_llama_chat.WorkerThreads`), and delivered back on the world thread by a
 completion queue drained each tick. Queue depth is capped
-(`mod_llama.MaxQueueDepth`) so a slow Llama sheds load instead of building a
+(`mod_llama_chat.MaxQueueDepth`) so a slow Llama sheds load instead of building a
 backlog of stale replies.
 
 ## License

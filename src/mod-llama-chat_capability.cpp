@@ -1,7 +1,7 @@
-#include "mod-llama_capability.h"
-#include "mod-llama_config.h"
-#include "mod-llama_httpclient.h"
-#include "mod-llama-utilities.h"
+#include "mod-llama-chat_capability.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_httpclient.h"
+#include "mod-llama-chat-utilities.h"
 
 #include "Log.h"
 
@@ -163,7 +163,7 @@ namespace
         if (!conclusive)
         {
             SetSupport(LlamaThinkSupport::ProbeFailed, detail);
-            LOG_WARN("module.mod_llama",
+            LOG_WARN("module.mod_llama_chat",
                      "[Llama Chat] Think-mode probe inconclusive for model '{}' ({}). "
                      "Proceeding without think mode.", model, detail);
         }
@@ -172,7 +172,7 @@ namespace
             SetSupport(supported ? LlamaThinkSupport::Supported
                                  : LlamaThinkSupport::Unsupported,
                        detail);
-            LOG_INFO("module.mod_llama",
+            LOG_INFO("module.mod_llama_chat",
                      "[Llama Chat] Think mode {} for model '{}' ({}).",
                      supported ? "AVAILABLE" : "not available", model, detail);
         }
@@ -262,7 +262,7 @@ void LlamaCapability_NoteThinkRejected()
 
     if (!g_rejectionLogged.exchange(true))
     {
-        LOG_INFO("module.mod_llama",
+        LOG_INFO("module.mod_llama_chat",
                  "[Llama Chat] Model '{}' rejected a thinking request; think mode is now "
                  "off for this model. Requests are retried without it automatically.",
                  g_LlamaModel);
@@ -274,10 +274,10 @@ void LlamaCapability_NoteUnconditionalReasoning()
     if (g_reasonsUnconditionally.exchange(true))
         return;
 
-    LOG_INFO("module.mod_llama",
+    LOG_INFO("module.mod_llama_chat",
              "[Llama Chat] Model '{}' produced reasoning despite think being off, and spent "
              "the whole NumPredict budget on it. Reasoning headroom is now added to every "
-             "request for this model (mod_llama.ReasoningTokenReserve = {}).",
+             "request for this model (mod_llama_chat.ReasoningTokenReserve = {}).",
              g_LlamaModel, g_ReasoningTokenReserve);
 }
 
@@ -291,7 +291,7 @@ void LlamaCapability_NoteEffortLevelRejected()
     if (g_effortLevelsRejected.exchange(true))
         return;
 
-    LOG_INFO("module.mod_llama",
+    LOG_INFO("module.mod_llama_chat",
              "[Llama Chat] Model '{}' does not take a string reasoning level; falling back to "
              "the boolean think field for the rest of this session.", g_LlamaModel);
 }
@@ -340,7 +340,7 @@ void LlamaCapability_NoteLatency(uint64_t milliseconds, bool thinkUsed)
     {
         if (!g_latencyDisabled.exchange(true))
         {
-            LOG_INFO("module.mod_llama",
+            LOG_INFO("module.mod_llama_chat",
                      "[Llama Chat] Think mode averaged {}ms over {} requests, above the "
                      "{}ms budget. Disabling think for the rest of this session so replies "
                      "stay responsive.", mean, n, g_ThinkMaxLatencyMs);
@@ -449,7 +449,7 @@ LlamaThinkPolicy LlamaCapability_ParsePolicy(const std::string& text, bool legac
     if (v == "off" || v == "0" || v == "false" || v == "no" || v == "never")
         return LlamaThinkPolicy::Off;
 
-    LOG_WARN("module.mod_llama",
+    LOG_WARN("module.mod_llama_chat",
              "[Llama Chat] Unrecognised ThinkMode value '{}'; using auto.", text);
     return LlamaThinkPolicy::Auto;
 }

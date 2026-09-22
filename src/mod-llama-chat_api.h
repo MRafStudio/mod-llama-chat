@@ -1,7 +1,7 @@
 #ifndef MOD_LLAMA_API_H
 #define MOD_LLAMA_API_H
 
-#include "mod-llama_capability.h"
+#include "mod-llama-chat_capability.h"
 #include <string>
 #include <cstdint>
 #include <string>

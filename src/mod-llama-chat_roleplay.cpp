@@ -1,6 +1,6 @@
-#include "mod-llama_roleplay.h"
-#include "mod-llama_config.h"
-#include "mod-llama-utilities.h"
+#include "mod-llama-chat_roleplay.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat-utilities.h"
 
 #include "DatabaseEnv.h"
 #include "Log.h"
@@ -141,7 +141,7 @@ void Roleplay_Load()
     // Optional DB overlay so servers can retune voices without a rebuild.
     // Table is created on demand by the module's SQL; absence is not an error.
     if (QueryResult result = CharacterDatabase.Query(
-            "SELECT kind, id, prompt FROM mod_llama_voice"))
+            "SELECT kind, id, prompt FROM mod_llama_chat_voice"))
     {
         uint32_t loaded = 0;
         do
@@ -165,7 +165,7 @@ void Roleplay_Load()
         } while (result->NextRow());
 
         if (loaded)
-            LOG_INFO("module.mod_llama",
+            LOG_INFO("module.mod_llama_chat",
                      "[Llama Chat] Loaded {} roleplay voice overrides from the database.", loaded);
     }
 }

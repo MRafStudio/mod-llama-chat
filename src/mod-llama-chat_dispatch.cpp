@@ -1,14 +1,14 @@
-#include "mod-llama_dispatch.h"
-#include "mod-llama_api.h"
-#include "mod-llama_config.h"
-#include "mod-llama_expression.h"
-#include "mod-llama_governor.h"
-#include "mod-llama_memory.h"
-#include "mod-llama_response.h"
-#include "mod-llama_roleplay.h"
-#include "mod-llama_sentiment.h"
-#include "mod-llama-utilities.h"
-#include "mod-llama_world.h"
+#include "mod-llama-chat_dispatch.h"
+#include "mod-llama-chat_api.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_expression.h"
+#include "mod-llama-chat_governor.h"
+#include "mod-llama-chat_memory.h"
+#include "mod-llama-chat_response.h"
+#include "mod-llama-chat_roleplay.h"
+#include "mod-llama-chat_sentiment.h"
+#include "mod-llama-chat-utilities.h"
+#include "mod-llama-chat_world.h"
 
 #include "CellImpl.h"
 #include "Channel.h"
@@ -117,7 +117,7 @@ namespace
             std::string filtered = Roleplay_FilterMetaTerms(text);
             if (filtered.empty() && !text.empty() && g_DebugEnabled)
             {
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] Bot {} reply rejected by roleplay filter: '{}'",
                          task.request.botName, text);
             }
@@ -128,7 +128,7 @@ namespace
         {
             ++g_droppedEmpty;
             if (g_DebugEnabled)
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] Bot {} produced nothing usable after cleanup.",
                          task.request.botName);
             return;
@@ -205,12 +205,12 @@ namespace
             catch (const std::exception& e)
             {
                 RecordError(e.what());
-                LOG_ERROR("module.mod_llama", "[Llama Chat] Worker exception: {}", e.what());
+                LOG_ERROR("module.mod_llama_chat", "[Llama Chat] Worker exception: {}", e.what());
             }
             catch (...)
             {
                 RecordError("unknown exception");
-                LOG_ERROR("module.mod_llama", "[Llama Chat] Unknown worker exception.");
+                LOG_ERROR("module.mod_llama_chat", "[Llama Chat] Unknown worker exception.");
             }
 
             --g_inFlight;
@@ -352,7 +352,7 @@ namespace
         {
             ++g_droppedGovernor;
             if (g_DebugEnabled)
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] Bot {} reply suppressed as repetitive: '{}'",
                          bot->GetName(), c.text);
             return;
@@ -362,7 +362,7 @@ namespace
         {
             ++g_droppedGovernor;
             if (g_DebugEnabled)
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] Bot {} reply suppressed by cooldown/rate limit.",
                          bot->GetName());
             return;
@@ -372,7 +372,7 @@ namespace
         if (!RouteMessage(bot, botAI, c, world, channel))
         {
             if (g_DebugEnabled)
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] Bot {} had nowhere to send its reply ({}).",
                          bot->GetName(), ChatChannelSourceLocalStr[c.request.source]);
             return;
@@ -419,7 +419,7 @@ namespace
         }
 
         if (g_DebugEnabled)
-            LOG_INFO("module.mod_llama", "[Llama Chat] {} ({}, depth {}): {}",
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] {} ({}, depth {}): {}",
                      bot->GetName(), ChatChannelSourceLocalStr[c.request.source],
                      c.request.chainDepth, c.text);
 
@@ -454,7 +454,7 @@ void LlamaDispatch_Start()
     for (uint32_t i = 0; i < count; ++i)
         g_workers.emplace_back(WorkerLoop);
 
-    LOG_INFO("module.mod_llama", "[Llama Chat] Dispatcher started with {} worker threads.", count);
+    LOG_INFO("module.mod_llama_chat", "[Llama Chat] Dispatcher started with {} worker threads.", count);
 }
 
 void LlamaDispatch_Stop()
@@ -480,7 +480,7 @@ void LlamaDispatch_Stop()
         g_done.clear();
     }
 
-    LOG_INFO("module.mod_llama", "[Llama Chat] Dispatcher stopped.");
+    LOG_INFO("module.mod_llama_chat", "[Llama Chat] Dispatcher stopped.");
 }
 
 bool LlamaDispatch_Submit(LlamaChatRequest request)
@@ -502,7 +502,7 @@ bool LlamaDispatch_Submit(LlamaChatRequest request)
         {
             ++g_droppedQueueFull;
             if (g_DebugEnabled)
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] Queue full ({}); dropping request for {}.",
                          g_queue.size(), task.request.botName);
             return false;
@@ -591,7 +591,7 @@ void LlamaDispatch_Update(uint32_t /*diff*/)
         }
         catch (const std::exception& e)
         {
-            LOG_ERROR("module.mod_llama", "[Llama Chat] Delivery exception: {}", e.what());
+            LOG_ERROR("module.mod_llama_chat", "[Llama Chat] Delivery exception: {}", e.what());
         }
     }
 }

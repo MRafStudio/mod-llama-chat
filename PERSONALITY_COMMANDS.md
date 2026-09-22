@@ -1,13 +1,13 @@
 # Bot Personality Management Commands
 
-This document describes the new personality management system for mod-llama.
+This document describes the new personality management system for mod-llama-chat.
 
 ## Database Changes
 
-A new column `manual_only` has been added to the `mod_llama_personality_templates` table:
+A new column `manual_only` has been added to the `mod_llama_chat_personality_templates` table:
 
 ```sql
-ALTER TABLE `mod_llama_personality_templates`
+ALTER TABLE `mod_llama_chat_personality_templates`
 ADD COLUMN `manual_only` TINYINT(1) NOT NULL DEFAULT 0 AFTER `prompt`;
 ```
 
@@ -73,14 +73,14 @@ LlamaChat: Available personalities (33 total, 30 random-assignable):
 To create a manual-only personality, set the `manual_only` column to `1` in the database:
 
 ```sql
-INSERT INTO `mod_llama_personality_templates` (`key`, `prompt`, `manual_only`) VALUES
+INSERT INTO `mod_llama_chat_personality_templates` (`key`, `prompt`, `manual_only`) VALUES
 ('SPECIAL_NPC', 'Act like a specific named NPC with unique dialogue.', 1);
 ```
 
 or update an existing one:
 
 ```sql
-UPDATE `mod_llama_personality_templates` 
+UPDATE `mod_llama_chat_personality_templates` 
 SET `manual_only` = 1 
 WHERE `key` = 'EDGE_LORD';
 ```
@@ -113,6 +113,6 @@ audience).
 ### `.llama test <prompt>`
 
 One round trip to Llama, with the raw and post-processed output written side by
-side to the `module.mod_llama` log.
+side to the `module.mod_llama_chat` log.
 
 See the main README for the full description.

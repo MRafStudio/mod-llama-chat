@@ -1,6 +1,6 @@
-#include "mod-llama_response.h"
-#include "mod-llama_config.h"
-#include "mod-llama_expression.h"
+#include "mod-llama-chat_response.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_expression.h"
 
 #include <algorithm>
 #include <cctype>

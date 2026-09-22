@@ -1,8 +1,8 @@
-#include "mod-llama_expression.h"
-#include "mod-llama_config.h"
-#include "mod-llama_world.h"
-#include "mod-llama_governor.h"
-#include "mod-llama_dispatch.h"
+#include "mod-llama-chat_expression.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_world.h"
+#include "mod-llama-chat_governor.h"
+#include "mod-llama-chat_dispatch.h"
 
 #include "DBCStores.h"
 #include "Log.h"
@@ -543,7 +543,7 @@ uint32_t ExtractEmoteTag(std::string& response)
 
         if (g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama",
+            LOG_INFO("module.mod_llama_chat",
                      "[Llama Chat] Emote tag '{}' is not a WoW emote; {}.",
                      unresolved,
                      found ? "using the configured fallback gesture"
@@ -782,7 +782,7 @@ void ChatOnEmote::OnPlayerTextEmote(Player* player, uint32 textEmote,
         ScheduleBotExpression(bot, player->GetGUID(), reactEmote, g_BotExpressionDelayMs);
 
         if (g_DebugEnabled)
-            LOG_INFO("module.mod_llama", "[Llama Chat] Bot {} reacting to emote {} from {} with emote {}",
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Bot {} reacting to emote {} from {} with emote {}",
                      bot->GetName(), textEmote, player->GetName(), reactEmote);
         return;
     }

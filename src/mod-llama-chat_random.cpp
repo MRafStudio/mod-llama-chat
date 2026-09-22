@@ -1,16 +1,16 @@
-#include "mod-llama_random.h"
-#include "mod-llama_config.h"
-#include "mod-llama_dispatch.h"
-#include "mod-llama_governor.h"
-#include "mod-llama_handler.h"
-#include "mod-llama_personality.h"
-#include "mod-llama_roleplay.h"
-#include "mod-llama_sentiment.h"
-#include "mod-llama_memory.h"
-#include "mod-llama_topics.h"
-#include "mod-llama_world.h"
-#include "mod-llama_expression.h"
-#include "mod-llama-utilities.h"
+#include "mod-llama-chat_random.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_dispatch.h"
+#include "mod-llama-chat_governor.h"
+#include "mod-llama-chat_handler.h"
+#include "mod-llama-chat_personality.h"
+#include "mod-llama-chat_roleplay.h"
+#include "mod-llama-chat_sentiment.h"
+#include "mod-llama-chat_memory.h"
+#include "mod-llama-chat_topics.h"
+#include "mod-llama-chat_world.h"
+#include "mod-llama-chat_expression.h"
+#include "mod-llama-chat-utilities.h"
 
 #include "Channel.h"
 #include "ChannelMgr.h"
@@ -350,7 +350,7 @@ void LlamaBotRandomChatter::HandleRandomChatter()
         if (!ChooseDestination(bot, world, topic.isGuildTopic, source, channelName, channelId))
         {
             if (g_DebugEnabled)
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] Bot {} has nowhere to speak; skipping ambient line.",
                          bot->GetName());
             reschedule();

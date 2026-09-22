@@ -1,4 +1,4 @@
-# CLAUDE.md — mod-llama
+# CLAUDE.md — mod-llama-chat
 
 Guidance for working in this module. The repo-level `CLAUDE.md` at the
 AzerothCore root still applies; this adds module-specific rules.
@@ -15,7 +15,7 @@ hard to attribute back here.
 
 The module previously spawned one detached `std::thread` per bot per message and
 called `ObjectAccessor`, `Channel::Say`, `botAI->Say` and the whole eligibility
-scan from it. That is what `mod-llama_dispatch.{h,cpp}` exists to prevent.
+scan from it. That is what `mod-llama-chat_dispatch.{h,cpp}` exists to prevent.
 
 How to add a new kind of bot utterance:
 
@@ -104,19 +104,19 @@ repetition history.
 Whatever is most concrete and quotable in the prompt is what the model will
 talk about. Historically the module pasted every off-cooldown spell a bot knew
 into the prompt, which is exactly why bots kept talking about their spellbook.
-`mod_llama.Snapshot.IncludeSpells` defaults to `0` for this reason.
+`mod_llama_chat.Snapshot.IncludeSpells` defaults to `0` for this reason.
 
 When adding prompt material, prefer things outside the bot — people nearby,
 what just happened, where they are — over facts about the bot itself. The
-weights in `mod_llama.Topic.*` encode this deliberately.
+weights in `mod_llama_chat.Topic.*` encode this deliberately.
 
 ## Conventions
 
-- Log to `module.mod_llama`, not `server.loading`. It falls back to the
+- Log to `module.mod_llama_chat`, not `server.loading`. It falls back to the
   `Logger.module` entry that ships in `worldserver.conf.dist`, so it works
   untouched and is separately tunable. Keep startup/registration messages on
   `server.loading`.
-- Every new setting goes in `conf/mod_llama.conf.dist` with a comment
+- Every new setting goes in `conf/mod_llama_chat.conf.dist` with a comment
   block explaining what it does and its default. That file is the module's real
   documentation surface.
 - Source files are globbed by AzerothCore (`modules/*/src/*.cpp`); new files

@@ -1,11 +1,11 @@
-#include "mod-llama_memory.h"
-#include "mod-llama_api.h"
-#include "mod-llama_config.h"
-#include "mod-llama_dispatch.h"
-#include "mod-llama_handler.h"
-#include "mod-llama_personality.h"
-#include "mod-llama_roleplay.h"
-#include "mod-llama-utilities.h"
+#include "mod-llama-chat_memory.h"
+#include "mod-llama-chat_api.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_dispatch.h"
+#include "mod-llama-chat_handler.h"
+#include "mod-llama-chat_personality.h"
+#include "mod-llama-chat_roleplay.h"
+#include "mod-llama-chat-utilities.h"
 
 #include "DatabaseEnv.h"
 #include "Log.h"
@@ -211,7 +211,7 @@ void Memory_Load()
 
     if (QueryResult result = CharacterDatabase.Query(
             "SELECT bot_guid, memory_text, importance, UNIX_TIMESTAMP(created_at) "
-            "FROM mod_llama_memories ORDER BY importance DESC"))
+            "FROM mod_llama_chat_memories ORDER BY importance DESC"))
     {
         uint32_t loaded = 0;
         do
@@ -229,12 +229,12 @@ void Memory_Load()
             }
         } while (result->NextRow());
 
-        LOG_INFO("module.mod_llama", "[Llama Chat] Loaded {} bot memories.", loaded);
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Loaded {} bot memories.", loaded);
     }
 
     if (QueryResult result = CharacterDatabase.Query(
             "SELECT bot_guid, other_guid, other_name, description, mentions, "
-            "UNIX_TIMESTAMP(updated_at) FROM mod_llama_relationships"))
+            "UNIX_TIMESTAMP(updated_at) FROM mod_llama_chat_relationships"))
     {
         uint32_t loaded = 0;
         do
@@ -251,7 +251,7 @@ void Memory_Load()
             ++loaded;
         } while (result->NextRow());
 
-        LOG_INFO("module.mod_llama", "[Llama Chat] Loaded {} bot relationships.", loaded);
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Loaded {} bot relationships.", loaded);
     }
 }
 
@@ -270,7 +270,7 @@ void Memory_SaveAll()
         CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
         trans->Append(SafeFormat(
-            "DELETE FROM mod_llama_memories WHERE bot_guid = {}", botGuid));
+            "DELETE FROM mod_llama_chat_memories WHERE bot_guid = {}", botGuid));
 
         std::string values;
         for (const BotMemoryEntry& m : state.memories)
@@ -284,7 +284,7 @@ void Memory_SaveAll()
 
         if (!values.empty())
         {
-            trans->Append("INSERT INTO mod_llama_memories "
+            trans->Append("INSERT INTO mod_llama_chat_memories "
                           "(bot_guid, memory_text, importance, created_at) VALUES " + values);
         }
 
@@ -297,7 +297,7 @@ void Memory_SaveAll()
             // delete plus an insert, so it rewrites the row and every index
             // entry even when nothing about the relationship changed.
             trans->Append(SafeFormat(
-                "INSERT INTO mod_llama_relationships "
+                "INSERT INTO mod_llama_chat_relationships "
                 "(bot_guid, other_guid, other_name, description, mentions, updated_at) "
                 "VALUES ({}, {}, '{}', '{}', {}, FROM_UNIXTIME({})) "
                 "ON DUPLICATE KEY UPDATE other_name = VALUES(other_name), "
@@ -565,7 +565,7 @@ void Memory_RunCondensation(uint64_t botGuid, const std::string& prompt)
     if (!api.ok)
     {
         if (g_DebugEnabled)
-            LOG_INFO("module.mod_llama",
+            LOG_INFO("module.mod_llama_chat",
                      "[Llama Chat] Memory condensation failed for bot {}: {}",
                      botGuid, api.error);
         return;      // keep the history; we will try again next time
@@ -575,7 +575,7 @@ void Memory_RunCondensation(uint64_t botGuid, const std::string& prompt)
     ClearHistory(botGuid);
 
     if (g_DebugEnabled)
-        LOG_INFO("module.mod_llama",
+        LOG_INFO("module.mod_llama_chat",
                  "[Llama Chat] Condensed history for bot {} into {} memories.",
                  botGuid, fresh.size());
 }
@@ -623,7 +623,7 @@ void Memory_RunRelationshipUpdate(uint64_t botGuid, uint64_t otherGuid,
     state.dirty     = true;
 
     if (g_DebugEnabled)
-        LOG_INFO("module.mod_llama",
+        LOG_INFO("module.mod_llama_chat",
                  "[Llama Chat] Bot {} relationship with {} updated: {}",
                  botGuid, otherName, rel.description);
 }

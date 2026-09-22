@@ -1,9 +1,9 @@
-#include "mod-llama_api.h"
-#include "mod-llama_openai.h"   // [MRafStudio fork] OpenAI-совместимый транспорт
-#include "mod-llama_capability.h"
-#include "mod-llama_config.h"
-#include "mod-llama_httpclient.h"
-#include "mod-llama-utilities.h"
+#include "mod-llama-chat_api.h"
+#include "mod-llama-chat_openai.h"   // [MRafStudio fork] OpenAI-совместимый транспорт
+#include "mod-llama-chat_capability.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_httpclient.h"
+#include "mod-llama-chat-utilities.h"
 
 #include "Log.h"
 
@@ -68,7 +68,7 @@ namespace
             catch (const std::exception&)
             {
                 if (g_DebugEnabled)
-                    LOG_INFO("module.mod_llama", "[Llama Chat] Invalid seed value: {}", cfg.seed);
+                    LOG_INFO("module.mod_llama_chat", "[Llama Chat] Invalid seed value: {}", cfg.seed);
             }
         }
 
@@ -326,7 +326,7 @@ LlamaApiResult QueryLlama(const std::string& prompt, LlamaRequestKind kind)
     // part of the pipeline entirely.
     if (result.ok && result.text.empty() && !result.thinking.empty())
     {
-        LOG_ERROR("module.mod_llama",
+        LOG_ERROR("module.mod_llama_chat",
                   "[Llama Chat] Model '{}' returned {} characters of reasoning and no answer. "
                   "NumPredict={} plus ReasoningTokenReserve={} was not enough to finish "
                   "reasoning and reply; raise one of them, or set NumPredict = 0.",
@@ -338,7 +338,7 @@ LlamaApiResult QueryLlama(const std::string& prompt, LlamaRequestKind kind)
 
     if (!result.ok)
     {
-        LOG_ERROR("module.mod_llama",
+        LOG_ERROR("module.mod_llama_chat",
                   "[Llama Chat] Generation failed (model '{}', {}ms): {}",
                   cfg.model, result.latencyMs,
                   result.error.empty() ? "unknown error" : result.error);
@@ -349,12 +349,12 @@ LlamaApiResult QueryLlama(const std::string& prompt, LlamaRequestKind kind)
                                     ? think.level
                                     : (think.enabled ? std::string("yes") : std::string("no"));
 
-        LOG_INFO("module.mod_llama",
+        LOG_INFO("module.mod_llama_chat",
                  "[Llama Chat] Generation ok in {}ms (think={}), {} chars.",
                  result.latencyMs, thinkText, result.text.size());
 
         if (g_DebugShowFullPrompt && !result.thinking.empty())
-            LOG_INFO("module.mod_llama", "[Llama Chat] Model reasoning: {}", result.thinking);
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Model reasoning: {}", result.thinking);
     }
 
     return result;

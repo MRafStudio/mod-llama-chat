@@ -26,23 +26,23 @@
 #include <chrono>
 #include <ctime>
 #include "DatabaseEnv.h"
-#include "mod-llama_handler.h"
-#include "mod-llama_api.h"
-#include "mod-llama_personality.h"
-#include "mod-llama_config.h"
-#include "mod-llama-utilities.h"
-#include "mod-llama_sentiment.h"
-#include "mod-llama_rag.h"
-#include "mod-llama_dispatch.h"
-#include "mod-llama_governor.h"
-#include "mod-llama_response.h"
-#include "mod-llama_capability.h"
-#include "mod-llama_expression.h"
-#include "mod-llama_roleplay.h"
-#include "mod-llama_world.h"
-#include "mod-llama_memory.h"
-#include "mod-llama_topics.h"
-#include "mod-llama_random.h"
+#include "mod-llama-chat_handler.h"
+#include "mod-llama-chat_api.h"
+#include "mod-llama-chat_personality.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat-utilities.h"
+#include "mod-llama-chat_sentiment.h"
+#include "mod-llama-chat_rag.h"
+#include "mod-llama-chat_dispatch.h"
+#include "mod-llama-chat_governor.h"
+#include "mod-llama-chat_response.h"
+#include "mod-llama-chat_capability.h"
+#include "mod-llama-chat_expression.h"
+#include "mod-llama-chat_roleplay.h"
+#include "mod-llama-chat_world.h"
+#include "mod-llama-chat_memory.h"
+#include "mod-llama-chat_topics.h"
+#include "mod-llama-chat_random.h"
 #include <iomanip>
 #include "SpellMgr.h"
 #include "SpellInfo.h"
@@ -276,7 +276,7 @@ Channel* GetValidChannel(uint32_t teamId, const std::string& channelName, Player
     {
         if(g_DebugEnabled)
         {
-            LOG_ERROR("module.mod_llama", "[Llama Chat] Channel '{}' not found for team {}", channelName, teamId);
+            LOG_ERROR("module.mod_llama_chat", "[Llama Chat] Channel '{}' not found for team {}", channelName, teamId);
         }
     }
     return channel;
@@ -348,7 +348,7 @@ bool PlayerBotChatHandler::OnPlayerCanUseChat(Player* player, uint32_t type, uin
 
     if (g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] OnPlayerCanUseChat called: player={}, type={}, receiver={}",
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] OnPlayerCanUseChat called: player={}, type={}, receiver={}",
             player->GetName(), type, receiver ? receiver->GetName() : "null");
     }
 
@@ -444,7 +444,7 @@ void SaveBotConversationHistoryToDB()
             if (values.empty())
                 return;
 
-            trans->Append("INSERT IGNORE INTO mod_llama_history "
+            trans->Append("INSERT IGNORE INTO mod_llama_chat_history "
                           "(bot_guid, player_guid, timestamp, player_message, bot_reply) VALUES " + values);
             values.clear();
         };
@@ -483,10 +483,10 @@ void SaveBotConversationHistoryToDB()
         // by idx_pair_recent (bot_guid, player_guid, id). Only pairs that
         // gained a row are trimmed; the rest of the table is never touched.
         trans->Append(SafeFormat(
-            "DELETE FROM mod_llama_history "
+            "DELETE FROM mod_llama_chat_history "
             "WHERE bot_guid = {0} AND player_guid = {1} AND id < ("
                 "SELECT keep_id FROM ("
-                    "SELECT id AS keep_id FROM mod_llama_history "
+                    "SELECT id AS keep_id FROM mod_llama_chat_history "
                     "WHERE bot_guid = {0} AND player_guid = {1} "
                     "ORDER BY id DESC LIMIT 1 OFFSET {2}"
                 ") AS oldest_kept"
@@ -498,7 +498,7 @@ void SaveBotConversationHistoryToDB()
 
     if (g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama",
+        LOG_INFO("module.mod_llama_chat",
                  "[Llama Chat] Saved {} new conversation turn(s) across {} bot/player pair(s).",
                  savedTurns, static_cast<uint32_t>(pending.size()));
     }
@@ -513,7 +513,7 @@ void SaveBotConversationHistoryToDB()
 void DeleteBotConversationHistoryFromDB(uint64_t botGuid)
 {
     CharacterDatabase.Execute(SafeFormat(
-        "DELETE FROM mod_llama_history WHERE bot_guid = {}", botGuid));
+        "DELETE FROM mod_llama_chat_history WHERE bot_guid = {}", botGuid));
 }
 
 // Called when a bot sends a message (random chatter or other bot-initiated messages)
@@ -541,9 +541,9 @@ void ProcessBotChatMessage(Player* bot, const std::string& msg, ChatChannelSourc
             if (g_DebugEnabled)
             {
                 if (channel)
-                    LOG_INFO("module.mod_llama", "[Llama Chat] ProcessBotChatMessage: Found General channel for bot {}", bot->GetName());
+                    LOG_INFO("module.mod_llama_chat", "[Llama Chat] ProcessBotChatMessage: Found General channel for bot {}", bot->GetName());
                 else
-                    LOG_ERROR("module.mod_llama", "[Llama Chat] ProcessBotChatMessage: Could not find General channel for bot {}", bot->GetName());
+                    LOG_ERROR("module.mod_llama_chat", "[Llama Chat] ProcessBotChatMessage: Could not find General channel for bot {}", bot->GetName());
             }
         }
     }
@@ -563,7 +563,7 @@ void ProcessBotChatMessage(Player* bot, const std::string& msg, ChatChannelSourc
             // Must have a channel object
             canSendMessage = (channel != nullptr);
             if (!canSendMessage && g_DebugEnabled)
-                LOG_ERROR("module.mod_llama", "[Llama Chat] No bot replies to {} in General - no channel found", bot->GetName());
+                LOG_ERROR("module.mod_llama_chat", "[Llama Chat] No bot replies to {} in General - no channel found", bot->GetName());
             break;
             
         case SRC_GUILD_LOCAL:
@@ -579,20 +579,20 @@ void ProcessBotChatMessage(Player* bot, const std::string& msg, ChatChannelSourc
                     const bool hasRealPlayer = world.GuildHasRealPlayer(bot->GetGuildId());
                     canSendMessage = hasRealPlayer;
                     if (!canSendMessage && g_DebugEnabled)
-                        LOG_INFO("module.mod_llama", "[Llama Chat] No bot replies to {} in Guild - no real players online in guild", bot->GetName());
+                        LOG_INFO("module.mod_llama_chat", "[Llama Chat] No bot replies to {} in Guild - no real players online in guild", bot->GetName());
                 }
                 else
                 {
                     canSendMessage = false;
                     if (g_DebugEnabled)
-                        LOG_ERROR("module.mod_llama", "[Llama Chat] No bot replies to {} in Guild - guild not found", bot->GetName());
+                        LOG_ERROR("module.mod_llama_chat", "[Llama Chat] No bot replies to {} in Guild - guild not found", bot->GetName());
                 }
             }
             else
             {
                 canSendMessage = false;
                 if (g_DebugEnabled)
-                    LOG_ERROR("module.mod_llama", "[Llama Chat] No bot replies to {} in Guild - not in a guild", bot->GetName());
+                    LOG_ERROR("module.mod_llama_chat", "[Llama Chat] No bot replies to {} in Guild - not in a guild", bot->GetName());
             }
             break;
             
@@ -614,13 +614,13 @@ void ProcessBotChatMessage(Player* bot, const std::string& msg, ChatChannelSourc
                 }
                 canSendMessage = hasRealPlayer;
                 if (!canSendMessage && g_DebugEnabled)
-                    LOG_INFO("module.mod_llama", "[Llama Chat] No bot replies to {} in Party - no real players in group", bot->GetName());
+                    LOG_INFO("module.mod_llama_chat", "[Llama Chat] No bot replies to {} in Party - no real players in group", bot->GetName());
             }
             else
             {
                 canSendMessage = false;
                 if (g_DebugEnabled)
-                    LOG_ERROR("module.mod_llama", "[Llama Chat] No bot replies to {} in Party - not in a group", bot->GetName());
+                    LOG_ERROR("module.mod_llama_chat", "[Llama Chat] No bot replies to {} in Party - not in a group", bot->GetName());
             }
             break;
             
@@ -637,7 +637,7 @@ void ProcessBotChatMessage(Player* bot, const std::string& msg, ChatChannelSourc
     if (!canSendMessage)
     {
         if (g_DebugEnabled)
-            LOG_INFO("module.mod_llama",
+            LOG_INFO("module.mod_llama_chat",
                      "[Llama Chat] Not propagating {}'s {} line to other bots - no audience.",
                      bot->GetName(), ChatChannelSourceLocalStr[sourceLocal]);
         return;
@@ -1097,7 +1097,7 @@ std::string GenerateBotGameStateSnapshot(Player* bot)
 void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32_t lang, std::string& msg, ChatChannelSourceLocal sourceLocal, Channel* channel, Player* receiver, uint8_t chainDepth)
 {
     if (player == nullptr) {
-        LOG_ERROR("module.mod_llama", "[Llama Chat] ProcessChat: player is null");
+        LOG_ERROR("module.mod_llama_chat", "[Llama Chat] ProcessChat: player is null");
         return;
     }
     if (msg.empty()) {
@@ -1140,7 +1140,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
     {
         if (g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Custom channels are disabled, skipping");
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Custom channels are disabled, skipping");
         }
         return;
     }
@@ -1149,7 +1149,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
     {
         if (g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Say/Yell channels are disabled, skipping");
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Say/Yell channels are disabled, skipping");
         }
         return;
     }
@@ -1158,7 +1158,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
     {
         if (g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Guild channels are disabled, skipping");
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Guild channels are disabled, skipping");
         }
         return;
     }
@@ -1167,7 +1167,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
     {
         if (g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Party/Raid channels are disabled, skipping");
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Party/Raid channels are disabled, skipping");
         }
         return;
     }
@@ -1211,7 +1211,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
         if (!Governor_ChainDepthAllowed(chainDepth))
         {
             if (g_DebugEnabled)
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] Chain depth {} reached the limit; not continuing.",
                          chainDepth);
             return;
@@ -1220,7 +1220,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
         if (!Governor_HasRecentHuman(scopeKey))
         {
             if (g_DebugEnabled)
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] No real player has spoken in {} recently; "
                          "bots will not talk among themselves here.", scopeKey);
             return;
@@ -1243,14 +1243,14 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
         {
             if(g_DebugEnabled)
             {
-                LOG_INFO("module.mod_llama", "[Llama Chat] Whisper replies are disabled, skipping");
+                LOG_INFO("module.mod_llama_chat", "[Llama Chat] Whisper replies are disabled, skipping");
             }
             return;
         }
         
         if(g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Processing whisper from {} to {}", 
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Processing whisper from {} to {}", 
                     player->GetName(), receiver->GetName());
         }
         
@@ -1267,12 +1267,12 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
             eligibleBots.push_back(receiver);
             if(g_DebugEnabled)
             {
-                LOG_INFO("module.mod_llama", "[Llama Chat] Found eligible bot {} for whisper", receiver->GetName());
+                LOG_INFO("module.mod_llama_chat", "[Llama Chat] Found eligible bot {} for whisper", receiver->GetName());
             }
         }
         else if(g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Whisper target {} is not a bot or has no AI", receiver->GetName());
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Whisper target {} is not a bot or has no AI", receiver->GetName());
         }
     }
     else if (channel != nullptr)
@@ -1280,7 +1280,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
         // For channel chat, find all bots that are in the same channel instance
         if(g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Processing channel message in '{}' (ID: {})", 
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Processing channel message in '{}' (ID: {})", 
                     channel->GetName(), channel->GetChannelId());
         }
         
@@ -1289,7 +1289,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
         {
             if(g_DebugEnabled)
             {
-                LOG_ERROR("module.mod_llama", "[Llama Chat] Channel is null, cannot process channel message");
+                LOG_ERROR("module.mod_llama_chat", "[Llama Chat] Channel is null, cannot process channel message");
             }
             return;
         }
@@ -1316,7 +1316,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
         if (!hasRealPlayerInChannel)
         {
             if (g_DebugEnabled)
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] No real players in channel '{}'; skipping.",
                          channel->GetName());
             return;
@@ -1361,7 +1361,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
             {
                 if(g_DebugEnabled)
                 {
-                    //LOG_INFO("module.mod_llama", "[Llama Chat] Bot {} not in channel '{}', skipping", candidate->GetName(), channel->GetName());
+                    //LOG_INFO("module.mod_llama_chat", "[Llama Chat] Bot {} not in channel '{}', skipping", candidate->GetName(), channel->GetName());
                 }
                 continue;
             }
@@ -1373,7 +1373,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
                 {
                     if(g_DebugEnabled)
                     {
-                        //LOG_ERROR("module.mod_llama", "[Llama Chat] Bot {} FAILED faction check - Bot: {}, Player: {}, Channel: '{}'", candidate->GetName(), (int)candidate->GetTeamId(), (int)player->GetTeamId(), channel->GetName());
+                        //LOG_ERROR("module.mod_llama_chat", "[Llama Chat] Bot {} FAILED faction check - Bot: {}, Player: {}, Channel: '{}'", candidate->GetName(), (int)candidate->GetTeamId(), (int)player->GetTeamId(), channel->GetName());
                     }
                     continue; // SKIP this bot - wrong faction
                 }
@@ -1383,7 +1383,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
             {
                 if(g_DebugEnabled)
                 {
-                    //LOG_INFO("module.mod_llama", "[Llama Chat] Bot {} skipped - no real players in channel '{}'", candidate->GetName(), channel->GetName());
+                    //LOG_INFO("module.mod_llama_chat", "[Llama Chat] Bot {} skipped - no real players in channel '{}'", candidate->GetName(), channel->GetName());
                 }
                 continue;
             }
@@ -1392,13 +1392,13 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
             eligibleBots.push_back(candidate);
             if(g_DebugEnabled)
             {
-                // LOG_INFO("module.mod_llama", "[Llama Chat] VERIFIED eligible bot {} in channel '{}' - Distance: {:.2f}, Zone match: {}", candidate->GetName(), channel->GetName(), candidate->GetDistance(player), (candidate->GetZoneId() == player->GetZoneId()));
+                // LOG_INFO("module.mod_llama_chat", "[Llama Chat] VERIFIED eligible bot {} in channel '{}' - Distance: {:.2f}, Zone match: {}", candidate->GetName(), channel->GetName(), candidate->GetDistance(player), (candidate->GetZoneId() == player->GetZoneId()));
             }
         }
         
         if(g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Found {} bots in channel instance '{}'", 
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Found {} bots in channel instance '{}'", 
                     eligibleBots.size(), channel->GetName());
         }
     }
@@ -1491,7 +1491,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
     
     if (g_DebugEnabled && notEligibleCount > 0)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] {} bots not eligible for {} (distance/guild/party checks failed)", 
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] {} bots not eligible for {} (distance/guild/party checks failed)", 
                 notEligibleCount, ChatChannelSourceLocalStr[sourceLocal]);
     }
     
@@ -1544,7 +1544,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
 
     if(g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Sender: {} ({}), Channel: {}, Depth: {}, Reply Chance: {}%, Candidate Bots: {}",
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Sender: {} ({}), Channel: {}, Depth: {}, Reply Chance: {}%, Candidate Bots: {}",
                 player->GetName(), senderIsBot ? "BOT" : "PLAYER", ChatChannelSourceLocalStr[sourceLocal], chainDepth, chance, candidateBots.size());
     }
 
@@ -1567,7 +1567,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
                 finalCandidates.push_back(whisperBot);
                 if(g_DebugEnabled)
                 {
-                    LOG_INFO("module.mod_llama", "[Llama Chat] Whisper: Bot {} selected to respond", whisperBot->GetName());
+                    LOG_INFO("module.mod_llama_chat", "[Llama Chat] Whisper: Bot {} selected to respond", whisperBot->GetName());
                 }
             }
         }
@@ -1608,7 +1608,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
                 mentionedBots.emplace_back(pos, bot);
                 if(g_DebugEnabled)
                 {
-                    LOG_INFO("module.mod_llama", "[Llama Chat] Bot {} mentioned at position {} in message", bot->GetName(), pos);
+                    LOG_INFO("module.mod_llama_chat", "[Llama Chat] Bot {} mentioned at position {} in message", bot->GetName(), pos);
                 }
             }
         }
@@ -1624,7 +1624,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
                 finalCandidates.push_back(chosen);
                 if(g_DebugEnabled)
                 {
-                    LOG_INFO("module.mod_llama", "[Llama Chat] Bot {} selected (mentioned first at position {})", 
+                    LOG_INFO("module.mod_llama_chat", "[Llama Chat] Bot {} selected (mentioned first at position {})", 
                             chosen->GetName(), mentionedBots.front().first);
                 }
             }
@@ -1637,7 +1637,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
                 {
                     if(g_DebugEnabled)
                     {
-                        LOG_INFO("module.mod_llama", "[Llama Chat] Bot {} skipped - in combat", bot->GetName());
+                        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Bot {} skipped - in combat", bot->GetName());
                     }
                     continue;
                 }
@@ -1664,12 +1664,12 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
                     finalCandidates.push_back(bot);
                     if(g_DebugEnabled)
                     {
-                        LOG_INFO("module.mod_llama", "[Llama Chat] Bot {} PASSED chance roll ({} < {}%{})", bot->GetName(), roll, botChance, botIsAddressed ? ", addressed" : "");
+                        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Bot {} PASSED chance roll ({} < {}%{})", bot->GetName(), roll, botChance, botIsAddressed ? ", addressed" : "");
                     }
                 }
                 else if(g_DebugEnabled)
                 {
-                    LOG_INFO("module.mod_llama", "[Llama Chat] Bot {} FAILED chance roll ({} >= {}%{})", bot->GetName(), roll, botChance, botIsAddressed ? ", addressed" : "");
+                    LOG_INFO("module.mod_llama_chat", "[Llama Chat] Bot {} FAILED chance roll ({} >= {}%{})", bot->GetName(), roll, botChance, botIsAddressed ? ", addressed" : "");
                 }
             }
         }
@@ -1680,11 +1680,11 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
     {
         if(g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] *** NO BOTS RESPONDING *** to {} from {} in {} channel. "
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] *** NO BOTS RESPONDING *** to {} from {} in {} channel. "
                     "Eligible: {}, Candidates: {}, Final: 0, Chance: {}%",
                     senderIsBot ? "BOT" : "PLAYER", player->GetName(), ChatChannelSourceLocalStr[sourceLocal],
                     eligibleBots.size(), candidateBots.size(), chance);
-            LOG_INFO("module.mod_llama", "[Llama Chat] No eligible bots found to respond to message '{}'. "
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] No eligible bots found to respond to message '{}'. "
                     "Source: {}, Eligible bots: {}, Candidate bots: {}, Combat disabled: {}",
                     msg, ChatChannelSourceLocalStr[sourceLocal], eligibleBots.size(), 
                     candidateBots.size(), g_DisableRepliesInCombat);
@@ -1700,7 +1700,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
         uint32_t countToPick = urand(1, g_MaxBotsToPick);
         if(g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] Limiting {} bots to {} (MaxBotsToPick)", finalCandidates.size(), countToPick);
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Limiting {} bots to {} (MaxBotsToPick)", finalCandidates.size(), countToPick);
         }
         finalCandidates.resize(countToPick);
     }
@@ -1713,7 +1713,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
             if (!botNames.empty()) botNames += ", ";
             botNames += bot->GetName();
         }
-        LOG_INFO("module.mod_llama", "[Llama Chat] *** {} BOTS RESPONDING *** to {} from {} in {}: [{}]",
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] *** {} BOTS RESPONDING *** to {} from {} in {}: [{}]",
                 finalCandidates.size(), senderIsBot ? "BOT" : "PLAYER", player->GetName(),
                 ChatChannelSourceLocalStr[sourceLocal], botNames);
     }
@@ -1736,7 +1736,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
         if (!Governor_CanSend(bot->GetGUID(), scopeKey, directAddress))
         {
             if (g_DebugEnabled)
-                LOG_INFO("module.mod_llama",
+                LOG_INFO("module.mod_llama_chat",
                          "[Llama Chat] Bot {} skipped: cooldown or rate limit.", bot->GetName());
             continue;
         }
@@ -1766,7 +1766,7 @@ void PlayerBotChatHandler::ProcessChat(Player* player, uint32_t /*type*/, uint32
 
         if (!LlamaDispatch_Submit(std::move(request)) && g_DebugEnabled)
         {
-            LOG_INFO("module.mod_llama",
+            LOG_INFO("module.mod_llama_chat",
                      "[Llama Chat] Bot {} reply dropped: dispatcher queue full.",
                      bot->GetName());
         }
@@ -1778,14 +1778,14 @@ static bool IsBotEligibleForChatChannelLocal(Player* bot, Player* player, ChatCh
     if (!bot || !player || bot == player)
     {
         if (g_DebugEnabled)
-            LOG_INFO("module.mod_llama", "[Llama Chat] IsBotEligible: FAILED basic check - bot={}, player={}, same={}", 
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] IsBotEligible: FAILED basic check - bot={}, player={}, same={}", 
                     (void*)bot, (void*)player, (bot == player));
         return false;
     }
     if (!PlayerbotsMgr::instance().GetPlayerbotAI(bot))
     {
         if (g_DebugEnabled)
-            LOG_INFO("module.mod_llama", "[Llama Chat] IsBotEligible: Bot {} FAILED - no PlayerbotAI", bot->GetName());
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] IsBotEligible: Bot {} FAILED - no PlayerbotAI", bot->GetName());
         return false;
     }
         
@@ -1816,7 +1816,7 @@ static bool IsBotEligibleForChatChannelLocal(Player* bot, Player* player, ChatCh
         {
             if(g_DebugEnabled)
             {
-                LOG_ERROR("module.mod_llama", "[Llama Chat] IsBotEligibleForChatChannelLocal: Channel is null");
+                LOG_ERROR("module.mod_llama_chat", "[Llama Chat] IsBotEligibleForChatChannelLocal: Channel is null");
             }
             return false;
         }
@@ -1832,7 +1832,7 @@ static bool IsBotEligibleForChatChannelLocal(Player* bot, Player* player, ChatCh
         {
             if(g_DebugEnabled)
             {
-                LOG_INFO("module.mod_llama", "[Llama Chat] IsBotEligibleForChatChannelLocal: Bot {} not in same channel instance '{}' - Bot team: {}, Channel ptr: {} vs {}", 
+                LOG_INFO("module.mod_llama_chat", "[Llama Chat] IsBotEligibleForChatChannelLocal: Bot {} not in same channel instance '{}' - Bot team: {}, Channel ptr: {} vs {}", 
                         bot->GetName(), channel->GetName(), (int)bot->GetTeamId(),
                         (void*)candidateChannel, (void*)channel);
             }
@@ -1850,7 +1850,7 @@ static bool IsBotEligibleForChatChannelLocal(Player* bot, Player* player, ChatCh
             {
                 if(g_DebugEnabled)
                 {
-                    LOG_INFO("module.mod_llama", "[Llama Chat] IsBotEligibleForChatChannelLocal: Bot {} different faction from player - Bot: {}, Player: {}, Channel: '{}'", bot->GetName(), (int)bot->GetTeamId(), (int)player->GetTeamId(), channel->GetName());
+                    LOG_INFO("module.mod_llama_chat", "[Llama Chat] IsBotEligibleForChatChannelLocal: Bot {} different faction from player - Bot: {}, Player: {}, Channel: '{}'", bot->GetName(), (int)bot->GetTeamId(), (int)player->GetTeamId(), channel->GetName());
                 }
                 return false;
             }
@@ -1914,7 +1914,7 @@ std::string GenerateBotPrompt(Player* bot, std::string playerMessage, Player* pl
         return "";
     }
     if (g_ChatPromptTemplate.empty()) {
-        LOG_ERROR("module.mod_llama", "[Llama Chat] GenerateBotPrompt: template is empty");
+        LOG_ERROR("module.mod_llama_chat", "[Llama Chat] GenerateBotPrompt: template is empty");
         return "";
     }
 
@@ -1967,11 +1967,11 @@ std::string GenerateBotPrompt(Player* bot, std::string playerMessage, Player* pl
             ragInfo = SafeFormat(g_RAGPromptTemplate, fmt::arg("rag_info", ragContent));
         }
         if (g_DebugEnabled) {
-            LOG_INFO("module.mod_llama", "[Llama Chat] RAG Debug - Enabled: {}, System: {}, Message: '{}', Results: {}, Content length: {}",
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] RAG Debug - Enabled: {}, System: {}, Message: '{}', Results: {}, Content length: {}",
                 g_EnableRAG, (void*)g_RAGSystem, playerMessage, ragResults.size(), ragContent.length());
         }
     } else if (g_DebugEnabled) {
-        LOG_INFO("module.mod_llama", "[Llama Chat] RAG Debug - Not enabled or no system - Enabled: {}, System: {}",
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] RAG Debug - Not enabled or no system - Enabled: {}, System: {}",
             g_EnableRAG, (void*)g_RAGSystem);
     }
 
@@ -2036,7 +2036,7 @@ std::string GenerateBotPrompt(Player* bot, std::string playerMessage, Player* pl
 
     // Debug logging for full prompt including RAG information
     if (g_DebugEnabled && g_DebugShowFullPrompt) {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Full prompt sent to bot {} for player {}: {}", botName, playerName, prompt);
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Full prompt sent to bot {} for player {}: {}", botName, playerName, prompt);
     }
 
     return prompt;

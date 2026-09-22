@@ -1,6 +1,6 @@
-#include "mod-llama_governor.h"
-#include "mod-llama_config.h"
-#include "mod-llama-utilities.h"
+#include "mod-llama-chat_governor.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat-utilities.h"
 
 #include <algorithm>
 #include <cctype>

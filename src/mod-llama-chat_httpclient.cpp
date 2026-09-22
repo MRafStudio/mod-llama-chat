@@ -1,5 +1,5 @@
-#include "mod-llama_httpclient.h"
-#include "mod-llama_config.h"
+#include "mod-llama-chat_httpclient.h"
+#include "mod-llama-chat_config.h"
 
 #include <httplib.h>
 
@@ -227,7 +227,7 @@ LlamaHttpResult LlamaHttpClient::PostEx(const std::string& url, const std::strin
         if (!u.valid)
         {
             result.error = "Invalid URL format: " + url;
-            LOG_ERROR("module.mod_llama", "[Llama Chat] {}", result.error);
+            LOG_ERROR("module.mod_llama_chat", "[Llama Chat] {}", result.error);
             return result;
         }
 
@@ -238,21 +238,21 @@ LlamaHttpResult LlamaHttpClient::PostEx(const std::string& url, const std::strin
                                        : m_timeout);
 
         if (g_DebugEnabled)
-            LOG_INFO("module.mod_llama", "[Llama Chat] POST {}:{}{}", u.host, u.port, u.path);
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] POST {}:{}{}", u.host, u.port, u.path);
 
         result = Perform(u, timeout, jsonData, true);
 
         if (!result.error.empty())
-            LOG_ERROR("module.mod_llama", "[Llama Chat] HTTP POST to {}:{}{} failed: {}",
+            LOG_ERROR("module.mod_llama_chat", "[Llama Chat] HTTP POST to {}:{}{} failed: {}",
                       u.host, u.port, u.path, result.error);
         else if (!result.ok() && g_DebugEnabled)
-            LOG_INFO("module.mod_llama", "[Llama Chat] HTTP {} from {}{} body: {}",
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] HTTP {} from {}{} body: {}",
                      result.status, u.host, u.path, result.body);
     }
     catch (const std::exception& e)
     {
         result.error = e.what();
-        LOG_ERROR("module.mod_llama", "[Llama Chat] HTTP client exception: {}", e.what());
+        LOG_ERROR("module.mod_llama_chat", "[Llama Chat] HTTP client exception: {}", e.what());
     }
 
     return result;
@@ -309,7 +309,7 @@ LlamaHttpResult LlamaHttpClient::PostExWithToken(const std::string& url, const s
         if (!u.valid)
         {
             result.error = "Invalid URL format: " + url;
-            LOG_ERROR("module.mod_llama", "[Llama Chat] {}", result.error);
+            LOG_ERROR("module.mod_llama_chat", "[Llama Chat] {}", result.error);
             return result;
         }
 
@@ -320,22 +320,22 @@ LlamaHttpResult LlamaHttpClient::PostExWithToken(const std::string& url, const s
                                        : m_timeout);
 
         if (g_DebugEnabled)
-            LOG_INFO("module.mod_llama", "[Llama Chat] POST (bearer) {}{}", u.host, u.path);
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] POST (bearer) {}{}", u.host, u.path);
 
         httplib::Headers extra = { { "Authorization", "Bearer " + bearerToken } };
         result = Perform(u, timeout, jsonData, true, &extra);
 
         if (!result.error.empty())
-            LOG_ERROR("module.mod_llama", "[Llama Chat] HTTP POST (bearer) to {}:{} failed: {}",
+            LOG_ERROR("module.mod_llama_chat", "[Llama Chat] HTTP POST (bearer) to {}:{} failed: {}",
                       u.host, u.path, result.error);
         else if (!result.ok() && g_DebugEnabled)
-            LOG_INFO("module.mod_llama", "[Llama Chat] HTTP {} from {} (bearer) body: {}",
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] HTTP {} from {} (bearer) body: {}",
                      result.status, u.path, result.body.substr(0, 300));
     }
     catch (const std::exception& e)
     {
         result.error = e.what();
-        LOG_ERROR("module.mod_llama", "[Llama Chat] HTTP client exception: {}", e.what());
+        LOG_ERROR("module.mod_llama_chat", "[Llama Chat] HTTP client exception: {}", e.what());
     }
 
     return result;

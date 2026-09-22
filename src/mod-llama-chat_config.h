@@ -156,7 +156,7 @@ extern time_t       g_LastHistorySaveTime;
 extern std::vector<std::string> g_BlacklistCommands;
 
 // --------------------------------------------
-// Think Mode (see mod-llama_capability.h)
+// Think Mode (see mod-llama-chat_capability.h)
 // --------------------------------------------
 extern bool     g_ThinkModeEnableForModule;   // deprecated; maps onto ThinkMode
 extern uint8_t  g_ThinkModePolicy;            // LlamaThinkPolicy
@@ -422,7 +422,7 @@ extern LlamaRAGSystem* g_RAGSystem;                     // Global RAG system ins
 // --------------------------------------------
 // Event Chatter: Event Type Strings
 // These control the event type string sent to eventChatter for world event prompts.
-// Values are loaded from conf (see mod_llama.conf.dist)
+// Values are loaded from conf (see mod_llama_chat.conf.dist)
 // --------------------------------------------
 extern std::string g_EventTypeDefeated;           // "defeated"
 extern std::string g_EventTypeDefeatedPlayer;     // "defeated player"

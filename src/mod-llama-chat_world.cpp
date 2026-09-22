@@ -1,4 +1,4 @@
-#include "mod-llama_world.h"
+#include "mod-llama-chat_world.h"
 
 #include "AreaDefines.h"
 #include "Channel.h"

@@ -1,14 +1,14 @@
-#include "mod-llama_command.h"
-#include "mod-llama_config.h"
-#include "mod-llama_sentiment.h"
-#include "mod-llama_personality.h"
-#include "mod-llama_api.h"
-#include "mod-llama_capability.h"
-#include "mod-llama_dispatch.h"
-#include "mod-llama_governor.h"
-#include "mod-llama_response.h"
-#include "mod-llama_roleplay.h"
-#include "mod-llama-utilities.h"
+#include "mod-llama-chat_command.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_sentiment.h"
+#include "mod-llama-chat_personality.h"
+#include "mod-llama-chat_api.h"
+#include "mod-llama-chat_capability.h"
+#include "mod-llama-chat_dispatch.h"
+#include "mod-llama-chat_governor.h"
+#include "mod-llama-chat_response.h"
+#include "mod-llama-chat_roleplay.h"
+#include "mod-llama-chat-utilities.h"
 #include "Log.h"
 #include "DatabaseEnv.h"
 #include <thread>
@@ -264,7 +264,7 @@ bool LlamaChatConfigCommand::HandleLlamaSentimentResetCommand(ChatHandler* handl
         }
         g_BotPlayerSentiments.clear();
         g_DirtySentiments.clear();
-        CharacterDatabase.Execute("DELETE FROM mod_llama_bot_player_sentiments");
+        CharacterDatabase.Execute("DELETE FROM mod_llama_chat_bot_player_sentiments");
         handler->SendSysMessage(fmt::format("LlamaChat: Reset all sentiment data ({} records).", count));
         return true;
     }
@@ -325,7 +325,7 @@ bool LlamaChatConfigCommand::HandleLlamaSentimentResetCommand(ChatHandler* handl
             }
 
             CharacterDatabase.Execute(SafeFormat(
-                "DELETE FROM mod_llama_bot_player_sentiments WHERE bot_guid = {}", botGuid));
+                "DELETE FROM mod_llama_chat_bot_player_sentiments WHERE bot_guid = {}", botGuid));
             handler->SendSysMessage(fmt::format("LlamaChat: Reset all sentiment data for bot '{}' ({} records).", 
                                     targetBot->GetName(), count));
         }
@@ -360,7 +360,7 @@ bool LlamaChatConfigCommand::HandleLlamaSentimentResetCommand(ChatHandler* handl
         }
 
         CharacterDatabase.Execute(SafeFormat(
-            "DELETE FROM mod_llama_bot_player_sentiments WHERE player_guid = {}", playerGuid));
+            "DELETE FROM mod_llama_chat_bot_player_sentiments WHERE player_guid = {}", playerGuid));
 
         handler->SendSysMessage(fmt::format("LlamaChat: Reset all sentiment data involving player '{}' ({} records).", 
                                 targetPlayer->GetName(), count));
@@ -530,7 +530,7 @@ bool LlamaChatConfigCommand::HandleLlamaTestCommand(ChatHandler* handler, Acore:
 
         if (!api.ok)
         {
-            LOG_INFO("module.mod_llama", "[Llama Chat] TEST FAILED after {}ms: {}",
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] TEST FAILED after {}ms: {}",
                      api.latencyMs, api.error.empty() ? "unknown error" : api.error);
             return;
         }
@@ -538,16 +538,16 @@ bool LlamaChatConfigCommand::HandleLlamaTestCommand(ChatHandler* handler, Acore:
         uint32_t emote = 0;
         const std::string cleaned = ProcessLlmResponse(api.text, "Tester", &emote);
 
-        LOG_INFO("module.mod_llama", "[Llama Chat] TEST ok in {}ms (think={}).",
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] TEST ok in {}ms (think={}).",
                  api.latencyMs, api.thinkUsed ? "yes" : "no");
-        LOG_INFO("module.mod_llama", "[Llama Chat] TEST raw     : {}", api.text);
-        LOG_INFO("module.mod_llama", "[Llama Chat] TEST cleaned : {}", cleaned);
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] TEST raw     : {}", api.text);
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] TEST cleaned : {}", cleaned);
         if (emote)
-            LOG_INFO("module.mod_llama", "[Llama Chat] TEST emote   : {}", emote);
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] TEST emote   : {}", emote);
         if (!api.thinking.empty())
-            LOG_INFO("module.mod_llama", "[Llama Chat] TEST thinking: {}", api.thinking);
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] TEST thinking: {}", api.thinking);
     }).detach();
 
-    handler->PSendSysMessage("[Llama Chat] Result will appear in the server log (module.mod_llama).");
+    handler->PSendSysMessage("[Llama Chat] Result will appear in the server log (module.mod_llama_chat).");
     return true;
 }

@@ -1,8 +1,8 @@
-#include "mod-llama_sentiment.h"
-#include "mod-llama_config.h"
-#include "mod-llama_api.h"
-#include "mod-llama_dispatch.h"
-#include "mod-llama-utilities.h"
+#include "mod-llama-chat_sentiment.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_api.h"
+#include "mod-llama-chat_dispatch.h"
+#include "mod-llama-chat-utilities.h"
 #include "Log.h"
 #include "DatabaseEnv.h"
 #include "Player.h"
@@ -47,7 +47,7 @@ void SetBotPlayerSentiment(uint64_t botGuid, uint64_t playerGuid, float sentimen
     
     if (g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Set sentiment between bot {} and player {} to {:.2f}", 
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Set sentiment between bot {} and player {} to {:.2f}", 
                  botGuid, playerGuid, sentimentValue);
     }
 }
@@ -67,7 +67,7 @@ float AnalyzeMessageSentiment(const std::string& prompt)
     
     if (g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Sentiment analysis prompt: {}", prompt);
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Sentiment analysis prompt: {}", prompt);
     }
     
     // Sentiment is a judgement call and is never shown to players, so this is
@@ -78,7 +78,7 @@ float AnalyzeMessageSentiment(const std::string& prompt)
     if (response.empty())
     {
         if (g_DebugEnabled)
-            LOG_INFO("module.mod_llama", "[Llama Chat] Empty sentiment analysis response");
+            LOG_INFO("module.mod_llama_chat", "[Llama Chat] Empty sentiment analysis response");
         return 0.0f;
     }
     
@@ -100,7 +100,7 @@ float AnalyzeMessageSentiment(const std::string& prompt)
     
     if (g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Sentiment analysis: '{}' -> adjustment: {:.2f}", 
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Sentiment analysis: '{}' -> adjustment: {:.2f}", 
                  response, adjustment);
     }
     
@@ -124,7 +124,7 @@ void ApplySentimentAnalysis(uint64_t botGuid, uint64_t playerGuid,
 
     if (g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama",
+        LOG_INFO("module.mod_llama_chat",
                  "[Llama Chat] Sentiment {:.2f} -> {:.2f} ({:+.2f}) for bot {} toward player {}",
                  currentSentiment, newSentiment, adjustment, botGuid, playerGuid);
     }
@@ -168,11 +168,11 @@ void LoadBotPlayerSentimentsFromDB()
     g_BotPlayerSentiments.clear();
     g_DirtySentiments.clear();
     
-    QueryResult result = CharacterDatabase.Query("SELECT bot_guid, player_guid, sentiment_value FROM mod_llama_bot_player_sentiments");
+    QueryResult result = CharacterDatabase.Query("SELECT bot_guid, player_guid, sentiment_value FROM mod_llama_chat_bot_player_sentiments");
     
     if (!result)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] No existing sentiment data found in database");
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] No existing sentiment data found in database");
         return;
     }
     
@@ -189,7 +189,7 @@ void LoadBotPlayerSentimentsFromDB()
         
     } while (result->NextRow());
     
-    LOG_INFO("module.mod_llama", "[Llama Chat] Loaded {} sentiment records from database", count);
+    LOG_INFO("module.mod_llama_chat", "[Llama Chat] Loaded {} sentiment records from database", count);
 }
 
 void SaveBotPlayerSentimentsToDB()
@@ -237,7 +237,7 @@ void SaveBotPlayerSentimentsToDB()
     for (const auto& [key, sentimentValue] : changed)
     {
         trans->Append(SafeFormat(
-            "INSERT INTO mod_llama_bot_player_sentiments "
+            "INSERT INTO mod_llama_chat_bot_player_sentiments "
             "(bot_guid, player_guid, sentiment_value) VALUES ({}, {}, {:.3f}) "
             "ON DUPLICATE KEY UPDATE sentiment_value = VALUES(sentiment_value)",
             key.first, key.second, sentimentValue));
@@ -247,7 +247,7 @@ void SaveBotPlayerSentimentsToDB()
 
     if (g_DebugEnabled)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Saved {} changed sentiment record(s) to database",
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Saved {} changed sentiment record(s) to database",
                  static_cast<uint32_t>(changed.size()));
     }
 }
@@ -256,11 +256,11 @@ void InitializeSentimentTracking()
 {
     if (!g_EnableSentimentTracking)
     {
-        LOG_INFO("module.mod_llama", "[Llama Chat] Sentiment tracking is disabled");
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Sentiment tracking is disabled");
         return;
     }
     
-    LOG_INFO("module.mod_llama", "[Llama Chat] Initializing sentiment tracking system...");
+    LOG_INFO("module.mod_llama_chat", "[Llama Chat] Initializing sentiment tracking system...");
     
     // Load existing sentiment data from database
     LoadBotPlayerSentimentsFromDB();
@@ -268,5 +268,5 @@ void InitializeSentimentTracking()
     // Initialize the last save time
     g_LastSentimentSaveTime = time(nullptr);
     
-    LOG_INFO("module.mod_llama", "[Llama Chat] Sentiment tracking system initialized");
+    LOG_INFO("module.mod_llama_chat", "[Llama Chat] Sentiment tracking system initialized");
 }

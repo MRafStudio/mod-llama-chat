@@ -2,7 +2,7 @@
 #define MOD_LLAMA_OPENAI_H
 
 // ===========================================================================
-//  [MRafStudio fork] OpenAI-совместимый транспорт для mod-llama
+//  [MRafStudio fork] OpenAI-совместимый транспорт для mod-llama-chat
 // ===========================================================================
 //  Зачем: llama.cpp (llama-server), Llama (>=0.2), DeepSeek, LM Studio и
 //  прочие говорят на /v1/chat/completions, но НЕ на ollama-нативный
@@ -14,19 +14,19 @@
 //  поэтому обновления upstream мержатся без боли.
 //
 //  Функции для будущих ролей (изображения/аудио) описаны в
-//  mod-llama_openai.cpp как готовые вспомогательные сборщики тел:
+//  mod-llama-chat_openai.cpp как готовые вспомогательные сборщики тел:
 //  они не вызываются из модуля-болтовни, но готовы для мультимодальных
 //  сценариев (vision-вход от игрока, генерация картинок, TTS/STT).
 // ===========================================================================
 
-#include "mod-llama_api.h"
+#include "mod-llama-chat_api.h"
 
 #include <cstdint>
 #include <string>
 
 namespace LlamaOpenAi
 {
-    // true, если в конфиге выбран OpenAI-совместимый режим (mod_llama.ApiMode = "openai")
+    // true, если в конфиге выбран OpenAI-совместимый режим (mod_llama_chat.ApiMode = "openai")
     bool IsEnabled(const LlamaEndpointSettings& cfg);
 
     // Одна генерация через POST /v1/chat/completions.

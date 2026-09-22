@@ -1,8 +1,8 @@
 #ifndef MOD_LLAMA_DISPATCH_H
 #define MOD_LLAMA_DISPATCH_H
 
-#include "mod-llama_capability.h"
-#include "mod-llama_handler.h"
+#include "mod-llama-chat_capability.h"
+#include "mod-llama-chat_handler.h"
 
 #include "ObjectGuid.h"
 #include <string>

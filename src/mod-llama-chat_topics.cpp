@@ -1,8 +1,8 @@
-#include "mod-llama_topics.h"
-#include "mod-llama_config.h"
-#include "mod-llama_roleplay.h"
-#include "mod-llama_world.h"
-#include "mod-llama-utilities.h"
+#include "mod-llama-chat_topics.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_roleplay.h"
+#include "mod-llama-chat_world.h"
+#include "mod-llama-chat-utilities.h"
 
 #include "Bag.h"
 #include "CellImpl.h"

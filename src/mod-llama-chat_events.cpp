@@ -1,16 +1,16 @@
-#include "mod-llama_events.h"
-#include "mod-llama_config.h"
-#include "mod-llama_world.h"
-#include "mod-llama_expression.h"
-#include "mod-llama_dispatch.h"
-#include "mod-llama_governor.h"
-#include "mod-llama_handler.h"
-#include "mod-llama_memory.h"
-#include "mod-llama_personality.h"
-#include "mod-llama_roleplay.h"
-#include "mod-llama_sentiment.h"
-#include "mod-llama_topics.h"
-#include "mod-llama-utilities.h"
+#include "mod-llama-chat_events.h"
+#include "mod-llama-chat_config.h"
+#include "mod-llama-chat_world.h"
+#include "mod-llama-chat_expression.h"
+#include "mod-llama-chat_dispatch.h"
+#include "mod-llama-chat_governor.h"
+#include "mod-llama-chat_handler.h"
+#include "mod-llama-chat_memory.h"
+#include "mod-llama-chat_personality.h"
+#include "mod-llama-chat_roleplay.h"
+#include "mod-llama-chat_sentiment.h"
+#include "mod-llama-chat_topics.h"
+#include "mod-llama-chat-utilities.h"
 
 #include "AchievementMgr.h"
 #include "Containers.h"
@@ -178,7 +178,7 @@ void LlamaBotEventChatter::DispatchGameEvent(Player* source, std::string type, s
         return;
 
     if (g_DebugEnabled)
-        LOG_INFO("module.mod_llama", "[Llama Chat] Event from {}: type={} detail={}",
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Event from {}: type={} detail={}",
                  source->GetName(), type, detail);
 
     // Gather candidates.
@@ -287,7 +287,7 @@ void LlamaBotEventChatter::DispatchGameEvent(Player* source, std::string type, s
     }
 
     if (g_DebugEnabled)
-        LOG_INFO("module.mod_llama", "[Llama Chat] Event dispatch complete, {} bots queued.", responses);
+        LOG_INFO("module.mod_llama_chat", "[Llama Chat] Event dispatch complete, {} bots queued.", responses);
 }
 
 std::string LlamaBotEventChatter::BuildPrompt(Player* bot, std::string promptTemplate,
