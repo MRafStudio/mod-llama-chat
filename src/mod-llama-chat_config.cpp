@@ -1,5 +1,7 @@
 #include "mod-llama-chat_config.h"
 #include "Common.h"
+#include "Player.h"
+#include <chrono>
 #include "SharedDefines.h"
 #include "mod-llama-chat_sentiment.h"
 #include "mod-llama-chat_expression.h"
@@ -65,6 +67,15 @@ std::string g_LlamaSystemPrompt = "";
 // "ollama" -- как раньше (нативный /api/generate); "openai" -- /v1/chat/completions.
 std::string g_LlamaApiMode = "ollama";
 std::string g_LlamaApiKey = "";
+
+// [mod-llama-chat] Наши 4 оси отношений. Таблицу hermes_relations ведёт Lua-слой ALE
+// (математика весов живёт в Lua - пересборка сервера для её правки не нужна).
+bool        g_EnableHermesRelations         = true;
+std::string g_HermesRelationsPromptTemplate =
+    "Твои чувства к {player}: доверие {trust}/100, "
+    "привязанность {affection}/100, уважение {respect}/100, "
+    "влечение {attraction}/100 (настроение: {mood}). "
+    "Держись этих чувств в ответе.";
 bool        g_LlamaOpenAiDisableThinking = true;
 std::string g_LlamaSeed = "";
 int32_t     g_LlamaTopK             = -1;
@@ -562,6 +573,11 @@ void LoadLlamaChatConfig()
     // [MRafStudio fork] протокол + токен
     g_LlamaApiMode                   = sConfigMgr->GetOption<std::string>("mod_llama_chat.ApiMode", "ollama");
     g_LlamaApiKey                    = sConfigMgr->GetOption<std::string>("mod_llama_chat.ApiKey", "");
+
+    // [mod-llama-chat] Наши 4 оси отношений: модуль их только читает для промпта,
+    // считает математику Lua-слой (правки весов - без пересборки сервера).
+    g_EnableHermesRelations         = sConfigMgr->GetOption<bool>("mod_llama_chat.EnableHermesRelations", true);
+    g_HermesRelationsPromptTemplate = sConfigMgr->GetOption<std::string>("mod_llama_chat.HermesRelationsPromptTemplate", g_HermesRelationsPromptTemplate);
     g_LlamaOpenAiDisableThinking     = sConfigMgr->GetOption<bool>("mod_llama_chat.OpenAiDisableThinking", true);
 
     g_MaxConcurrentQueries            = sConfigMgr->GetOption<uint32_t>("mod_llama_chat.MaxConcurrentQueries", 0);
@@ -1219,4 +1235,58 @@ void LlamaChatConfigWorldScript::OnShutdown()
         g_RAGSystem = nullptr;
         LOG_INFO("module.mod_llama_chat", "[Llama Chat] RAG system cleaned up");
     }
+}
+
+// [mod-llama-chat] Читает наши 4 оси отношений из hermes_relations (таблицу ведёт
+// Lua-слой ALE) и возвращает готовый блок для промпта. Математику считает Lua -
+// пересборка сервера для правки весов не нужна.
+// Кэш 10 секунд: правила вендора запрещают частые обращения к БД.
+std::string GetHermesRelationPromptAddition(Player* bot, Player* player)
+{
+    if (!g_EnableHermesRelations || !bot || !player || g_HermesRelationsPromptTemplate.empty())
+        return "";
+
+    const uint64_t botGuid    = bot->GetGUID().GetRawValue();
+    const uint64_t playerGuid = player->GetGUID().GetRawValue();
+    const uint64_t cacheKey   = (botGuid << 20) ^ playerGuid;
+
+    struct CacheEntry
+    {
+        std::chrono::steady_clock::time_point at;
+        std::string                           text;
+    };
+
+    static std::unordered_map<uint64_t, CacheEntry> cache;
+    const auto now = std::chrono::steady_clock::now();
+
+    auto cached = cache.find(cacheKey);
+    if (cached != cache.end() &&
+        std::chrono::duration_cast<std::chrono::seconds>(now - cached->second.at).count() < 10)
+        return cached->second.text;
+
+    std::string out;
+    if (QueryResult result = CharacterDatabase.Query(
+            "SELECT trust, affection, respect, attraction, mood FROM `hermes_relations` "
+            "WHERE bot_guid = {} AND player_guid = {} LIMIT 1", botGuid, playerGuid))
+    {
+        const int           trust     = (*result)[0].Get<uint8>();
+        const int           affection = (*result)[1].Get<uint8>();
+        const int           respect   = (*result)[2].Get<uint8>();
+        const int           attraction = (*result)[3].Get<uint8>();
+        const std::string   mood      = (*result)[4].Get<std::string>();
+
+        if (trust || affection || respect || attraction)
+        {
+            out = SafeFormat(g_HermesRelationsPromptTemplate,
+                             fmt::arg("player",     player->GetName()),
+                             fmt::arg("trust",      trust),
+                             fmt::arg("affection",  affection),
+                             fmt::arg("respect",    respect),
+                             fmt::arg("attraction", attraction),
+                             fmt::arg("mood",       mood));
+        }
+    }
+
+    cache[cacheKey] = { now, out };
+    return out;
 }

@@ -181,7 +181,12 @@ namespace
         const nlohmann::json request = BuildRequest(cfg, prompt, think, reasoningReserve);
 
         const auto started = std::chrono::steady_clock::now();
-        LlamaHttpResult http = t_httpClient.PostEx(cfg.url, request.dump());
+        // [mod-llama-chat] Токен авторизации работает в ЛЮБОМ режиме:
+        // если ApiKey задан - шлём Authorization: Bearer и в нативном Ollama-режиме
+        // (llama.cpp --api-key, прокси с авторизацией, облачные шлюзы).
+        LlamaHttpResult http = cfg.apiKey.empty()
+            ? t_httpClient.PostEx(cfg.url, request.dump())
+            : t_httpClient.PostExWithToken(cfg.url, request.dump(), cfg.apiKey);
         const auto finished = std::chrono::steady_clock::now();
 
         result.latencyMs = static_cast<uint64_t>(

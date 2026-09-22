@@ -1957,6 +1957,8 @@ std::string GenerateBotPrompt(Player* bot, std::string playerMessage, Player* pl
 
     std::string chatHistory         = GetBotHistoryPrompt(botGuid, playerGuid, playerMessage);
     std::string sentimentInfo       = GetSentimentPromptAddition(bot, player);
+    // [mod-llama-chat] Наши многомерные отношения (trust/affection/respect/attraction)
+    std::string hermesRelations     = GetHermesRelationPromptAddition(bot, player);
 
     // Retrieve RAG information if enabled
     std::string ragInfo;
@@ -2016,6 +2018,14 @@ std::string GenerateBotPrompt(Player* bot, std::string playerMessage, Player* pl
     // Add RAG information to the prompt if available
     if (!ragInfo.empty()) {
         prompt += ragInfo + "\n";
+    }
+
+    // [mod-llama-chat] Чувства бота к игроку (4 оси: trust/affection/respect/attraction).
+    // Считает их Lua-слой ALE (правки весов - без пересборки), модуль только читает.
+    // Добавляем отдельной строкой, а не плейсхолдером в шаблон: лишний fmt::arg без
+    // плейсхолдера (или наоборот) даёт "[Format Error]" и ломает весь промпт.
+    if (!hermesRelations.empty()) {
+        prompt += hermesRelations + "\n";
     }
 
     if(g_EnableChatBotSnapshotTemplate)

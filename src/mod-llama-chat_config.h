@@ -3,6 +3,8 @@
 
 #include <string>
 #include <cstdint>
+
+class Player;
 #include <vector>
 #include <deque>
 #include <unordered_map>
@@ -58,6 +60,12 @@ extern std::string g_LlamaSeed;
 // --- [MRafStudio fork] протокол и токен --------------------------------
 extern std::string g_LlamaApiMode;               // "ollama" | "openai"
 extern std::string g_LlamaApiKey;                // Bearer-токен (может быть пустым)
+
+// [mod-llama-chat] Наши многомерные отношения (таблицу hermes_relations ведёт
+// Lua-слой ALE): trust / affection / respect / attraction. Модуль только ЧИТАЕТ.
+extern bool        g_EnableHermesRelations;
+extern std::string g_HermesRelationsPromptTemplate;
+std::string GetHermesRelationPromptAddition(Player* bot, Player* player);
 extern bool        g_LlamaOpenAiDisableThinking;
 
 // Optional sampling controls for response diversity. All default to "unset",
