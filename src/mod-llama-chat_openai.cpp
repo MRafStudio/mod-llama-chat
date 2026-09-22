@@ -156,7 +156,7 @@ namespace LlamaOpenAi
                                             const std::string& language,
                                             std::string& outContentType)
     {
-        const std::string boundary = "----HermesAudioBoundary7f3d";
+        const std::string boundary = "----LlamaChatAudioBoundary7f3d";
 
         auto part = [&](const std::string& name, const std::string& value)
         {

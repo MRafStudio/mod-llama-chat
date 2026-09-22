@@ -61,11 +61,11 @@ extern std::string g_LlamaSeed;
 extern std::string g_LlamaApiMode;               // "ollama" | "openai"
 extern std::string g_LlamaApiKey;                // Bearer-токен (может быть пустым)
 
-// [mod-llama-chat] Наши многомерные отношения (таблицу hermes_relations ведёт
+// [mod-llama-chat] Наши многомерные отношения (таблицу mod_llama_chat_bot_player_sentiments ведёт
 // Lua-слой ALE): trust / affection / respect / attraction. Модуль только ЧИТАЕТ.
-extern bool        g_EnableHermesRelations;
-extern std::string g_HermesRelationsPromptTemplate;
-std::string GetHermesRelationPromptAddition(Player* bot, Player* player);
+extern bool        g_EnableRelationAxes;
+extern std::string g_RelationAxesPromptTemplate;
+std::string GetRelationAxesPromptAddition(Player* bot, Player* player);
 extern bool        g_LlamaOpenAiDisableThinking;
 
 // Optional sampling controls for response diversity. All default to "unset",

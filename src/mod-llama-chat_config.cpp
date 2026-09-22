@@ -68,10 +68,10 @@ std::string g_LlamaSystemPrompt = "";
 std::string g_LlamaApiMode = "ollama";
 std::string g_LlamaApiKey = "";
 
-// [mod-llama-chat] Наши 4 оси отношений. Таблицу hermes_relations ведёт Lua-слой ALE
+// [mod-llama-chat] Наши 4 оси отношений. Таблицу mod_llama_chat_bot_player_sentiments ведёт Lua-слой ALE
 // (математика весов живёт в Lua - пересборка сервера для её правки не нужна).
-bool        g_EnableHermesRelations         = true;
-std::string g_HermesRelationsPromptTemplate =
+bool        g_EnableRelationAxes         = true;
+std::string g_RelationAxesPromptTemplate =
     "Твои чувства к {player}: доверие {trust}/100, "
     "привязанность {affection}/100, уважение {respect}/100, "
     "влечение {attraction}/100 (настроение: {mood}). "
@@ -576,8 +576,8 @@ void LoadLlamaChatConfig()
 
     // [mod-llama-chat] Наши 4 оси отношений: модуль их только читает для промпта,
     // считает математику Lua-слой (правки весов - без пересборки сервера).
-    g_EnableHermesRelations         = sConfigMgr->GetOption<bool>("mod_llama_chat.EnableHermesRelations", true);
-    g_HermesRelationsPromptTemplate = sConfigMgr->GetOption<std::string>("mod_llama_chat.HermesRelationsPromptTemplate", g_HermesRelationsPromptTemplate);
+    g_EnableRelationAxes         = sConfigMgr->GetOption<bool>("mod_llama_chat.EnableRelationAxes", true);
+    g_RelationAxesPromptTemplate = sConfigMgr->GetOption<std::string>("mod_llama_chat.RelationAxesPromptTemplate", g_RelationAxesPromptTemplate);
     g_LlamaOpenAiDisableThinking     = sConfigMgr->GetOption<bool>("mod_llama_chat.OpenAiDisableThinking", true);
 
     g_MaxConcurrentQueries            = sConfigMgr->GetOption<uint32_t>("mod_llama_chat.MaxConcurrentQueries", 0);
@@ -1237,13 +1237,13 @@ void LlamaChatConfigWorldScript::OnShutdown()
     }
 }
 
-// [mod-llama-chat] Читает наши 4 оси отношений из hermes_relations (таблицу ведёт
+// [mod-llama-chat] Читает наши 4 оси отношений из mod_llama_chat_bot_player_sentiments (таблицу ведёт
 // Lua-слой ALE) и возвращает готовый блок для промпта. Математику считает Lua -
 // пересборка сервера для правки весов не нужна.
 // Кэш 10 секунд: правила вендора запрещают частые обращения к БД.
-std::string GetHermesRelationPromptAddition(Player* bot, Player* player)
+std::string GetRelationAxesPromptAddition(Player* bot, Player* player)
 {
-    if (!g_EnableHermesRelations || !bot || !player || g_HermesRelationsPromptTemplate.empty())
+    if (!g_EnableRelationAxes || !bot || !player || g_RelationAxesPromptTemplate.empty())
         return "";
 
     const uint64_t botGuid    = bot->GetGUID().GetRawValue();
@@ -1266,7 +1266,7 @@ std::string GetHermesRelationPromptAddition(Player* bot, Player* player)
 
     std::string out;
     if (QueryResult result = CharacterDatabase.Query(
-            "SELECT trust, affection, respect, attraction, mood FROM `hermes_relations` "
+            "SELECT trust, affection, respect, attraction, mood FROM `mod_llama_chat_bot_player_sentiments` "
             "WHERE bot_guid = {} AND player_guid = {} LIMIT 1", botGuid, playerGuid))
     {
         const int           trust     = (*result)[0].Get<uint8>();
@@ -1277,7 +1277,7 @@ std::string GetHermesRelationPromptAddition(Player* bot, Player* player)
 
         if (trust || affection || respect || attraction)
         {
-            out = SafeFormat(g_HermesRelationsPromptTemplate,
+            out = SafeFormat(g_RelationAxesPromptTemplate,
                              fmt::arg("player",     player->GetName()),
                              fmt::arg("trust",      trust),
                              fmt::arg("affection",  affection),

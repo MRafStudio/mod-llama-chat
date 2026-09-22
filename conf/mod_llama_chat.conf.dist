@@ -67,8 +67,8 @@ mod_llama_chat.Model = llama3.2:1b
 #
 # ВАЖНО ПРО АРХИТЕКТУРУ:
 #   Математику отношений считает НЕ модуль, а скрипты Lua (движок ALE), которые
-#   живут в  release\bin\lua_scripts\hermes\  и пишут значения в таблицу
-#   hermes_relations (acore_characters). Модуль только ЧИТАЕТ готовые числа и
+#   живут в  release\bin\lua_scripts\llama\  и пишут значения в таблицу
+#   mod_llama_chat_bot_player_sentiments (acore_characters). Модуль только ЧИТАЕТ готовые числа и
 #   подмешивает их в промпт бота - поэтому правка весов и формул НЕ ТРЕБУЕТ
 #   пересборки сервера (достаточно сохранить .lua, подхватится за пару секунд).
 #
@@ -76,17 +76,17 @@ mod_llama_chat.Model = llama3.2:1b
 #   {player} {trust} {affection} {respect} {attraction} {mood} - подстановки.
 ###############################################################################
 
-#     mod_llama_chat.EnableHermesRelations
-#     Description: Включить чтение наших четырёх осей отношений (таблица hermes_relations)
+#     mod_llama_chat.EnableRelationAxes
+#     Description: Включить чтение наших четырёх осей отношений (таблица mod_llama_chat_bot_player_sentiments)
 #                  и подмешивание их в промпт бота.
 #     Default:     1 - включено
-mod_llama_chat.EnableHermesRelations = 1
+mod_llama_chat.EnableRelationAxes = 1
 
-#     mod_llama_chat.HermesRelationsPromptTemplate
+#     mod_llama_chat.RelationAxesPromptTemplate
 #     Description: Шаблон блока чувств, который уходит в промпт. Оставляйте подстановки
 #                  как есть. Пустая строка = блок не добавляется.
 #     Default:     "Твои чувства к {player}: доверие {trust}/100, привязанность {affection}/100, уважение {respect}/100, влечение {attraction}/100 (настроение: {mood}). Держись этих чувств в ответе."
-mod_llama_chat.HermesRelationsPromptTemplate = "Твои чувства к {player}: доверие {trust}/100, привязанность {affection}/100, уважение {respect}/100, влечение {attraction}/100 (настроение: {mood}). Держись этих чувств в ответе."
+mod_llama_chat.RelationAxesPromptTemplate = "Твои чувства к {player}: доверие {trust}/100, привязанность {affection}/100, уважение {respect}/100, влечение {attraction}/100 (настроение: {mood}). Держись этих чувств в ответе."
 #                   "Authorization: Bearer <значение>". Нужен серверам, поднятым
 #                   с --api-key (llama.cpp), а также облачным API (DeepSeek и др.).
 #      Default:    ""  (заголовок не отправляется)
