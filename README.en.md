@@ -33,6 +33,58 @@ The module talks to the LLM **directly** — no external translator/bridge proce
 
 ---
 
+## How it works
+
+### When a bot replies
+
+| Situation | Behaviour |
+|---|---|
+| **Whisper** (`/w`) | Replies **always**, distance does not matter — if `EnableWhisperReplies = 1` |
+| **Say** (`/s`) | Only when the player is within `SayDistance` (default **30 yards**) |
+| **Yell** (`/y`) | Only when the player is within `YellDistance` (default **100 yards**) |
+| **Party / raid / guild / channels** | Controlled by `Enable*Channel*` settings |
+| **In combat** | Depends on `DisableRepliesInCombat`: `0` — replies, `1` — stays silent |
+| **No real player nearby** | The bot stays silent — random chatter only fires within `RandomChatterRealPlayerDistance` (default 200 yards) |
+
+> In this project replies in combat are enabled (`DisableRepliesInCombat = 0`) and whisper replies
+> are on (`EnableWhisperReplies = 1`), so the bot never goes mute when you need it.
+
+### World events the bot reacts to
+
+The module subscribes to events and may comment on them in character (using its personality):
+
+| Event | What it comments on |
+|---|---|
+| Creature / player kill | "took down the enemy" |
+| Item received | rare loot, a find |
+| Player death | sympathy or mockery (per personality) |
+| Quest completed | "quest turned in" |
+| Spell learned | "learned a new skill" |
+| Duel | challenge, outcome |
+| Level up | congratulations |
+| Achievement | pride for the player |
+| GameObject used | reaction to chests/doors/devices |
+| Guild events, login | greeting, small talk |
+| **Player emote** (wave, hug) | gesture back or a worded reply |
+
+### Where the request goes
+
+```
+prompt (on the world thread)
+   ↓ into a bounded queue (MaxQueueDepth - overload protection)
+worker threads (WorkerThreads) → HTTP
+   ↓
+ApiMode = "openai" → POST /v1/chat/completions  (+ Authorization: Bearer)
+ApiMode = "ollama" → POST /api/generate          (+ Authorization: Bearer)
+   ↓ the reply returns to the world thread
+emote tags are stripped → gesture plays → text goes to chat as the bot
+```
+
+Game objects (Player, Group, Guild, Map) are touched **only on the world thread**; HTTP and string
+parsing happen on workers. This is an AzerothCore requirement and the module follows it.
+
+---
+
 ## Requirements
 
 * AzerothCore with the **Playerbots** module ([mod-playerbots](https://github.com/liyunfan1223/mod-playerbots))
